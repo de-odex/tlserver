@@ -106,9 +106,15 @@ ignore = [
   # tryceratops (TRY)
   # Avoid specifying long messages outside the exception class
   "TRY003",
+
+  # flake8-copyright (CPY)
+  # Missing copyright notice at top of file
+  "CPY001",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402", "INP001"]
+
 [dependency-groups]
-dev = [
-    "pytest>=8.4.2",
-]
+dev = ["pytest>=8.4.2"]
