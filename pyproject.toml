@@ -107,3 +107,8 @@ ignore = [
   # Avoid specifying long messages outside the exception class
   "TRY003",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
