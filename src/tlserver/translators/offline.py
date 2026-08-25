@@ -7,7 +7,6 @@ from loguru import logger
 
 from tlserver import plugins
 from tlserver.config import OfflineTranslatorSettings
-from tlserver.translator import Translator
 
 
 def tokenize_batch(text: list[str] | str, sp_source_model: str) -> list[list[str]]:
@@ -22,10 +21,9 @@ def detokenize_batch(text: list[list[str]], sp_target_model: str) -> list[str]:
     return sp.decode(text)  # pyright: ignore[reportAttributeAccessIssue]
 
 
-class OfflineTranslator(Translator[OfflineTranslatorSettings]):
+class OfflineTranslator:
     def __init__(self, config: OfflineTranslatorSettings) -> None:
-        super().__init__(config)
-
+        self.config = config
         self.translator_ready_or_not = False
         self.can_change_language_or_not = False
         self.translator: ctranslate2.Translator | None = None

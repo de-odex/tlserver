@@ -6,13 +6,11 @@ from loguru import logger
 
 from tlserver import plugins
 from tlserver.config import LLMTranslatorSettings
-from tlserver.translator import Translator
 
 
-class LLMTranslator(Translator[LLMTranslatorSettings]):
+class LLMTranslator:
     def __init__(self, config: LLMTranslatorSettings) -> None:
-        super().__init__(config)
-
+        self.config = config
         self.translator_ready_or_not = False
         self.can_change_language_or_not = True
         self.messages = []

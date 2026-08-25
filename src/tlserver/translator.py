@@ -1,51 +1,28 @@
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Protocol, TypeVar
 
 from tlserver.config import TranslatorSettingsBase
 
 ConfigT = TypeVar("ConfigT", bound=TranslatorSettingsBase)
 
 
-class Translator(ABC, Generic[ConfigT]):
+class Translator(Protocol[ConfigT]):
     config: ConfigT
 
-    @abstractmethod
-    def __init__(self, config: ConfigT) -> None:
-        self.config = config
-
     @property
-    @abstractmethod
-    def is_ready(self) -> bool:
-        pass
+    def is_ready(self) -> bool: ...
 
-    @abstractmethod
-    def pause(self) -> None:
-        pass
+    def pause(self) -> None: ...
 
-    @abstractmethod
-    def resume(self) -> None:
-        pass
+    def resume(self) -> None: ...
 
-    @abstractmethod
-    def activate(self) -> bool:
-        pass
+    def activate(self) -> bool: ...
 
-    @abstractmethod
-    async def translate(self, message: str) -> str:
-        pass
+    async def translate(self, message: str) -> str: ...
 
-    @abstractmethod
-    async def translate_batch(self, list_of_text_input: list[str]) -> list[str]:
-        pass
+    async def translate_batch(self, list_of_text_input: list[str]) -> list[str]: ...
 
-    @abstractmethod
-    def check_if_language_available(self, language: str) -> bool:
-        pass
+    def check_if_language_available(self, language: str) -> bool: ...
 
-    @abstractmethod
-    def change_output_language(self, output_language: str) -> str:
-        pass
+    def change_output_language(self, output_language: str) -> str: ...
 
-    @abstractmethod
-    def change_input_language(self, input_language: str) -> str:
-        pass
+    def change_input_language(self, input_language: str) -> str: ...
