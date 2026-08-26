@@ -116,5 +116,11 @@ ignore = [
 "__init__.py" = ["E402"]
 "**/{tests,docs,tools}/*" = ["E402", "INP001"]
 
+[tool.basedpyright]
+include = ["src"]
+exclude = ["assets", ".venv", "**/__pycache__"]
+pythonVersion = "3.11"
+typeCheckingMode = "all"
+
 [dependency-groups]
 dev = ["pytest>=8.4.2"]
