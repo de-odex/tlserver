@@ -114,7 +114,14 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402"]
-"**/{tests,docs,tools}/*" = ["E402", "INP001"]
+"**/{tests,docs,tools}/*" = [
+  "ANN",
+  "E402",
+  "INP001",
+  "PLR2004",
+  "S101",
+  "TC003",
+]
 
 [tool.basedpyright]
 include = ["src"]
@@ -123,4 +130,8 @@ pythonVersion = "3.11"
 typeCheckingMode = "all"
 
 [dependency-groups]
-dev = ["pytest>=8.4.2"]
+dev = ["pytest>=8.4.2", "pytest-cov>=6.0"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=tlserver --cov-report=term-missing --cov-fail-under=90"
+testpaths = ["tests"]
