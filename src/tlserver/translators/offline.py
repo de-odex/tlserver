@@ -1,6 +1,6 @@
 from functools import partial
 
-import ctranslate2
+import ctranslate2  # pyright: ignore[reportMissingTypeStubs]
 import sentencepiece as spm
 import trio
 from loguru import logger
@@ -10,15 +10,15 @@ from tlserver.pipeline import TranslationPipeline
 
 
 def tokenize_batch(text: list[str] | str, sp_source_model: str) -> list[list[str]]:
-    sp = spm.SentencePieceProcessor(sp_source_model)  # pyright: ignore[reportCallIssue]
+    sp = spm.SentencePieceProcessor(sp_source_model)
     if isinstance(text, list):
-        return sp.encode(text, out_type=str)  # pyright: ignore[reportAttributeAccessIssue]
-    return [sp.encode(text, out_type=str)]  # pyright: ignore[reportAttributeAccessIssue]
+        return sp.encode(text, out_type=str)  # pyright: ignore[reportAny]
+    return [sp.encode(text, out_type=str)]
 
 
 def detokenize_batch(text: list[list[str]], sp_target_model: str) -> list[str]:
-    sp = spm.SentencePieceProcessor(sp_target_model)  # pyright: ignore[reportCallIssue]
-    return sp.decode(text)  # pyright: ignore[reportAttributeAccessIssue]
+    sp = spm.SentencePieceProcessor(sp_target_model)
+    return sp.decode(text)  # pyright: ignore[reportAny]
 
 
 class OfflineTranslator:
@@ -42,7 +42,7 @@ class OfflineTranslator:
         self.stop_translation = False
 
     def activate(self) -> bool:
-        self.translator = ctranslate2.Translator(
+        self.translator = ctranslate2.Translator(  # pyright: ignore[reportUnknownMemberType]
             str(self.config.translate_model_path),
             device=self.config.device,
             intra_threads=self.config.intra_threads,
@@ -61,9 +61,9 @@ class OfflineTranslator:
             self.config.output_language,
         )
 
-        translated = await trio.to_thread.run_sync(
-            partial(
-                self.translator.translate_batch,  # pyright: ignore[reportOptionalMemberAccess]
+        translated = await trio.to_thread.run_sync(  # pyright: ignore[reportUnknownVariableType]
+            partial(  # pyright: ignore[reportUnknownArgumentType]
+                self.translator.translate_batch,  # pyright: ignore[reportUnknownMemberType, reportOptionalMemberAccess]
                 source=tokenize_batch(ctx.text, str(self.config.tok_source_model_path)),
                 beam_size=self.config.beam_size,
                 num_hypotheses=1,
@@ -73,11 +73,12 @@ class OfflineTranslator:
                 repetition_penalty=self.config.repetition_penalty,
             )
         )
-        translated = translated[0]
+        translated = translated[0]  # pyright: ignore[reportUnknownVariableType]
 
         detokenized = "".join(
             detokenize_batch(
-                translated.hypotheses[0], str(self.config.tok_target_model_path)
+                translated.hypotheses[0],  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+                str(self.config.tok_target_model_path),
             )
         )
 
@@ -99,9 +100,9 @@ class OfflineTranslator:
             for message in list_of_text_input
         ]
 
-        translated = await trio.to_thread.run_sync(
-            partial(
-                self.translator.translate_batch,  # pyright: ignore[reportOptionalMemberAccess]
+        translated = await trio.to_thread.run_sync(  # pyright: ignore[reportUnknownVariableType]
+            partial(  # pyright: ignore[reportUnknownArgumentType]
+                self.translator.translate_batch,  # pyright: ignore[reportUnknownMemberType, reportOptionalMemberAccess]
                 source=tokenize_batch(
                     [ctx.text for ctx in ctxs], str(self.config.tok_source_model_path)
                 ),
@@ -117,10 +118,11 @@ class OfflineTranslator:
         detokenized = [
             "".join(
                 detokenize_batch(
-                    result.hypotheses[0], str(self.config.tok_target_model_path)
+                    result.hypotheses[0],  # pyright: ignore[reportUnknownMemberType]
+                    str(self.config.tok_target_model_path),
                 )
             )
-            for result in translated
+            for result in translated  # pyright: ignore[reportUnknownVariableType]
         ]
 
         ctxs = [
