@@ -1,11 +1,15 @@
 - github actions
   - build pyinstaller exe
-- precommit
-  - lint and format
 - modern handler (death to separate ports per translator)
-- remove or refactor plugins.py
 - llm batching using structured outputs
+  - might be outdated
 - rest of translators (google deepl)
-
+- expanded contextual glossary for llms
+  - add to soft glossary in prompt if failed once
+  - add notes to prompt if name is found
+  - nicknames
+- llm batching using prompt
+- system prompt and message templating via jinja
 - issues
   - underspecified exceptions
+  - fix logging issues (llm.py)
