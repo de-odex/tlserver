@@ -95,7 +95,7 @@ app = cors(app, allow_origin="*")
 die = trio.Event()
 
 handlers: list[TranslatorHandler] = [
-    LegacyTranslatorHandler(translator_cls(translator_config))
+    LegacyTranslatorHandler(translator_cls(translator_config))  # pyright: ignore[reportCallIssue]
     for translator_config in config.translators
     if (translator_cls := TRANSLATOR_CLASSES[translator_config.kind]) is not None
     and translator_config.enabled
