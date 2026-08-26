@@ -5,8 +5,8 @@ import sentencepiece as spm
 import trio
 from loguru import logger
 
-from tlserver import plugins
 from tlserver.config import OfflineTranslatorSettings
+from tlserver.pipeline import TranslationPipeline
 
 
 def tokenize_batch(text: list[str] | str, sp_source_model: str) -> list[list[str]]:
@@ -28,6 +28,8 @@ class OfflineTranslator:
         self.can_change_language_or_not = False
         self.translator: ctranslate2.Translator | None = None
         self.stop_translation = False
+
+        self.pipeline = TranslationPipeline(config.preprocessors, config.postprocessors)
 
     @property
     def is_ready(self) -> bool:
@@ -53,12 +55,16 @@ class OfflineTranslator:
         if self.stop_translation:
             return "Translation is paused at the moment"
 
-        message = plugins.process_input_text(message)
+        ctx = self.pipeline.preprocess(
+            message,
+            self.config.input_language,
+            self.config.output_language,
+        )
 
         translated = await trio.to_thread.run_sync(
             partial(
                 self.translator.translate_batch,  # pyright: ignore[reportOptionalMemberAccess]
-                source=tokenize_batch(message, str(self.config.tok_source_model_path)),
+                source=tokenize_batch(ctx.text, str(self.config.tok_source_model_path)),
                 beam_size=self.config.beam_size,
                 num_hypotheses=1,
                 return_alternatives=False,
@@ -67,28 +73,37 @@ class OfflineTranslator:
                 repetition_penalty=self.config.repetition_penalty,
             )
         )
+        translated = translated[0]
 
-        final_result = []
-        for result in translated:
-            detokenized = "".join(
-                detokenize_batch(
-                    result.hypotheses[0], str(self.config.tok_target_model_path)
-                )
+        detokenized = "".join(
+            detokenize_batch(
+                translated.hypotheses[0], str(self.config.tok_target_model_path)
             )
-            final_result.append(detokenized)
+        )
 
-        result = plugins.process_output_text(final_result[0])
-        logger.info(f"{message!r}   ->   {translated!r}")
-        return result
+        ctx = self.pipeline.postprocess(ctx, detokenized)
+
+        logger.info(f"{ctx.source_text!r}   ->   {ctx.text!r}")
+        return ctx.text
 
     async def translate_batch(self, list_of_text_input: list[str]) -> list[str]:
         if self.stop_translation:
             return ["Translation is paused at the moment"]
+
+        ctxs = [
+            self.pipeline.preprocess(
+                message,
+                self.config.input_language,
+                self.config.output_language,
+            )
+            for message in list_of_text_input
+        ]
+
         translated = await trio.to_thread.run_sync(
             partial(
                 self.translator.translate_batch,  # pyright: ignore[reportOptionalMemberAccess]
                 source=tokenize_batch(
-                    list_of_text_input, str(self.config.tok_source_model_path)
+                    [ctx.text for ctx in ctxs], str(self.config.tok_source_model_path)
                 ),
                 beam_size=self.config.beam_size,
                 num_hypotheses=1,
@@ -99,17 +114,23 @@ class OfflineTranslator:
             )
         )
 
-        final_result = []
-        for result in translated:
-            detokenized = "".join(
+        detokenized = [
+            "".join(
                 detokenize_batch(
                     result.hypotheses[0], str(self.config.tok_target_model_path)
                 )
             )
-            final_result.append(detokenized)
-        for original, translated in zip(list_of_text_input, final_result, strict=True):
-            logger.info(f"{original!r}   ->   {translated!r}")
-        return final_result
+            for result in translated
+        ]
+
+        ctxs = [
+            self.pipeline.postprocess(ctx, text)
+            for ctx, text in zip(ctxs, detokenized, strict=True)
+        ]
+
+        for ctx in ctxs:
+            logger.info(f"{ctx.source_text!r}   ->   {ctx.text!r}")
+        return [ctx.text for ctx in ctxs]
 
     def check_if_language_available(self, language: str) -> bool:
         return self.config.supported_languages.get(language) is not None

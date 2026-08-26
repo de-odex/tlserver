@@ -4,8 +4,8 @@ import litellm
 import trio
 from loguru import logger
 
-from tlserver import plugins
 from tlserver.config import LLMTranslatorSettings
+from tlserver.pipeline import TranslationPipeline
 
 
 class LLMTranslator:
@@ -16,6 +16,9 @@ class LLMTranslator:
         self.messages = []
         self.translator = ""
         self.stop_translation = False
+
+        self.pipeline = TranslationPipeline(config.preprocessors, config.postprocessors)
+
         self.system_prompt = self.config.system_prompt
 
         self._process_system_prompt()
@@ -62,10 +65,14 @@ class LLMTranslator:
         return response.choices[0].message.content  # pyright: ignore[reportReturnType, reportAttributeAccessIssue]
 
     async def _translate(self, message: str) -> str:
-        message = plugins.process_input_text(message)
+        ctx = self.pipeline.preprocess(
+            message,
+            self.config.input_language,
+            self.config.output_language,
+        )
         if self.stop_translation:
             return "Translation is paused at the moment"
-        self.messages.append({"role": "user", "content": message})
+        self.messages.append({"role": "user", "content": ctx.text})
         result = await self.execute()
         self.messages.append({"role": "assistant", "content": result})
         # Ensure only the last 10 user and assistant messages are kept
@@ -75,7 +82,8 @@ class LLMTranslator:
                 self.messages[0],
                 *self.messages[-self.config.context_lines :],
             ]
-        return plugins.process_output_text(result)
+        ctx = self.pipeline.postprocess(ctx, result)
+        return ctx.text
 
     async def translate(self, message: str) -> str:
         result = await self._translate(message)

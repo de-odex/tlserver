@@ -4,6 +4,7 @@ import os
 import sys
 import tomllib
 from collections import Counter
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -101,6 +102,54 @@ class _BaseModel(BaseModel):
     )
 
 
+class ProcessorSettingsBase(_BaseModel):
+    enabled: bool = True
+
+
+class NormalizeProcessorSettings(ProcessorSettingsBase):
+    kind: Literal["normalize"]
+    unicode_form: Literal["NFC", "NFD", "NFKC", "NFKD"] = "NFC"
+    normalize_newlines: bool = True
+
+
+class ReplaceProcessorSettings(ProcessorSettingsBase):
+    kind: Literal["replace"]
+    replacements: dict[str, str]
+
+
+class RegexProcessorSettings(ProcessorSettingsBase):
+    kind: Literal["regex_replace"]
+    pattern: str
+    replacement: str
+
+
+@dataclass
+class GlossaryEntry:
+    source: str
+    target: str
+    case_sensitive: bool = True
+
+
+class GlossaryProcessorSettings(ProcessorSettingsBase):
+    kind: Literal["glossary"]
+    glossary: list[GlossaryEntry]
+
+
+# TODO: this...
+class PlaceholderProcessorSettings(ProcessorSettingsBase):
+    kind: Literal["placeholder"]
+
+
+ProcessorSettings = Annotated[
+    NormalizeProcessorSettings
+    | ReplaceProcessorSettings
+    | RegexProcessorSettings
+    | GlossaryProcessorSettings
+    | PlaceholderProcessorSettings,
+    Field(discriminator="kind"),
+]
+
+
 class TranslatorSettingsBase(_BaseModel):
     enabled: bool = True
     port: int | None = None
@@ -109,6 +158,9 @@ class TranslatorSettingsBase(_BaseModel):
     input_language: str = "Japanese"
     output_language: str = "English"
     supported_languages: dict[str, str]
+
+    preprocessors: list[ProcessorSettings] = Field(default_factory=list)
+    postprocessors: list[ProcessorSettings] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def at_least_one(self) -> Self:

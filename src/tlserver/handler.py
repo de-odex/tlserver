@@ -58,7 +58,7 @@ class CommandPayload(BaseModel):
             )
             self.message = Command.TRANSLATE_BATCH
         return self
-    
+
     @model_validator(mode="after")
     def validate_content(self) -> Self:
         adapter = self._content_adapters.get(self.message)
