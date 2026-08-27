@@ -28,18 +28,42 @@
 #set heading(numbering: none)
 
 #show heading.where(level: 1): it => block(
-  above: 1.8em,
-  below: 0.8em,
+  above: 2em,
+  below: 0.65em,
 )[
-  #set text(font: "Nunito Sans 12pt", size: 18pt, weight: "bold")
+  #set text(font: "Nunito Sans 12pt", size: 21pt, weight: "bold")
   #it.body
 ]
 
 #show heading.where(level: 2): it => block(
-  above: 1.4em,
-  below: 0.6em,
+  above: 1.5em,
+  below: 0.5em,
+)[
+  #set text(font: "Nunito Sans 12pt", size: 16pt, weight: "bold")
+  #it.body
+]
+
+#show heading.where(level: 3): it => block(
+  above: 1.15em,
+  below: 0.4em,
 )[
   #set text(font: "Nunito Sans 12pt", size: 13pt, weight: "bold")
+  #it.body
+]
+
+#show heading.where(level: 4): it => block(
+  above: 0.95em,
+  below: 0.35em,
+)[
+  #set text(font: "Nunito Sans 12pt", size: 11.5pt, weight: "bold")
+  #it.body
+]
+
+#show heading.where(level: 5): it => block(
+  above: 0.8em,
+  below: 0.3em,
+)[
+  #set text(font: "Nunito Sans 12pt", size: 10.5pt, weight: "bold")
   #it.body
 ]
 
@@ -82,3 +106,24 @@ For this guide I will be using a trimmed down #link("https://lunatranslator.org/
 = Sugoi Offline Guide (non-llm, kinda old)
 == (Optional) If you have an NVIDIA GPU and want to use it to run translations:
 Download the gpu installer #link("https://drive.google.com/file/d/1d6logK9H25Q5pqNmstLFUO2JeUCiwFW7/view?usp=sharing")[here] and extract the folder somewhere
+
+
+= test
+== test
+=== test
+==== test
+===== test
+hello
+
+= test
+hello
+== test
+hello
+=== test
+hello
+==== test
+hello
+===== test
+hello
+
+more body text
