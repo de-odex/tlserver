@@ -13,7 +13,8 @@
 #show raw.where(block: false): it => box(
   fill: luma(230),
   radius: 2pt,
-  outset: (x: 1.5pt, y: 2.5pt),
+  inset: (x: 1.5pt, y: 0pt),
+  outset: (x: 0pt, y: 2.5pt),
 )[#it]
 
 #set document(
@@ -146,377 +147,459 @@ For this guide, I will be using a trimmed down #link("https://lunatranslator.org
   )
 ]
 
-#pagebreak()
-
+#pagebreak(weak: true)
 = Sugoi Offline Guide (non-LLM, kinda old)
 == (Optional) If you have an NVIDIA GPU and want to use it to run translations:
-Download the gpu installer #link("https://drive.google.com/file/d/1d6logK9H25Q5pqNmstLFUO2JeUCiwFW7/view?usp=sharing")[here] and extract the folder somewhere.
 
-#block[
-  #figure(
-    image("./images/image42.png"),
-  )
+#block(breakable: false)[
+  Download the gpu installer #link("https://drive.google.com/file/d/1d6logK9H25Q5pqNmstLFUO2JeUCiwFW7/view?usp=sharing")[here] and extract the folder somewhere.
+
+  #block[
+    #figure(
+      image("./images/image42.png"),
+    )
+  ]
+
+  Run the “run–install-cuda.bat” file and continue with the command prompt instructions.
 ]
-
-Run the “run–install-cuda.bat” file and continue with the command prompt instructions.
 
 == Main Guide
 === If using the Sugoi install linked in this doc:
-Navigate to your Sugoi folder and run the “run.bat” file.
 
-#block[
-  #figure(
-    image("./images/image34.png"),
-  )
+#block(breakable: false)[
+  Navigate to your Sugoi folder and run the “run.bat” file.
+
+  #block[
+    #figure(
+      image("./images/image34.png"),
+    )
+  ]
 ]
 
-This should open up a command prompt and your server should be up and running.
+#block(breakable: false)[
+  This should open up a command prompt and your server should be up and running.
 
-#block[
-  #figure(
-    image("./images/image31.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image31.png"),
+    )
+  ]
 ]
 
 === If using any other version of Sugoi (The below is using V14 as an example):
-Navigate to your Sugoi folder and run the “Sugoi-Translator-Toolkit (click here).bat” file.
 
-#block[
-  #figure(
-    image("./images/image46.png"),
-  )
+#block(breakable: false)[
+  Navigate to your Sugoi folder and run the “Sugoi-Translator-Toolkit (click here).bat” file.
+
+  #block[
+    #figure(
+      image("./images/image46.png"),
+    )
+  ]
 ]
 
-It should open up a menu window. You want to look for “Translation Server Offline” and click on it.
+#block(breakable: false)[
+  It should open up a menu window. You want to look for “Translation Server Offline” and click on it.
 
-#block[
-  #figure(
-    image("./images/image28.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image28.png"),
+    )
+  ]
 ]
 
-It should open a command prompt and now your translation server is all good to go.
+#block(breakable: false)[
+  It should open a command prompt and now your translation server is all good to go.
 
-#block[
-  #figure(
-    image("./images/image31.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image31.png"),
+    )
+  ]
 ]
 
 // FIXME: heading too long
 === Unless your Sugoi server is running at a different port, you should not need to do this step (This is specifically for every other version that’s not the V12 listed in the doc earlier) Skip to Next step if using the doc’s V12:
 
-To find which port your server is running at, navigate to “Sugoi/Code” and look for the “User-Settings.json” file.
+#block(breakable: false)[
+  To find which port your server is running at, navigate to “Sugoi/Code” and look for the “User-Settings.json” file.
 
-Open up the JSON file and look for a list starting with [“Offline”].
+  Open up the JSON file and look for a list starting with [“Offline”].
 
-Now look at the value set as "HTTP_port_number” and copy the value (in this case, 14366)
+  Now look at the value set as "HTTP_port_number” and copy the value (in this case, 14366)
 
-#block[
-  #figure(
-    image("./images/image44.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image44.png"),
+    )
+  ]
 ]
 
-Close the JSON file and head to your `Umamusume/hachimi` folder.
+#block(breakable: false)[
+  Close the JSON file and head to your `Umamusume/hachimi` folder.
 
-#block[
-  #figure(
-    image("./images/image14.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image14.png"),
+    )
+  ]
 ]
 
-Open the config.json file and find “sugoi_url”, it should be set to null by default
+#block(breakable: false)[
+  Open the config.json file and find “sugoi_url”, it should be set to null by default
 
-#block[
-  #figure(
-    image("./images/image27.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image27.png"),
+    )
+  ]
 ]
 
+#pagebreak(weak: true)
 = Sugoi LLM Guide (LLM, really good, demanding)
 Credits to Rika for the TLServer :3
 
 == Prerequisites:
-I will be using Python 3.11 and uv to run this.
 
-// FIXME: a better (easier) installation method than this
-Download #link("https://www.python.org/downloads/release/python-3110/")[Python 3.11] and make sure it is added to the system path on install.
+#block(breakable: false)[
+  I will be using Python 3.11 and uv to run this.
 
-Download #link("https://docs.astral.sh/uv/")[uv] by running “pip install uv” in your commandline.
+  // FIXME: a better (easier) installation method than this
+  Download #link("https://www.python.org/downloads/release/python-3110/")[Python 3.11] and make sure it is added to the system path on install.
 
-You will also need to install LM Studio (or any other OpenAI compatible backends, etc).
+  Download #link("https://docs.astral.sh/uv/")[uv] by running “pip install uv” in your commandline.
 
-Download #link("https://lmstudio.ai/")[LM Studio] and it should be a straightforward setup.
+  You will also need to install LM Studio (or any other OpenAI compatible backends, etc).
+
+  Download #link("https://lmstudio.ai/")[LM Studio] and it should be a straightforward setup.
+]
 
 == Main Guide:
-Pop over to this link #link("https://github.com/de-odex/tlserver")[here] and download the source as a zip, and extract it somewhere.
 
-Or run `git clone https://github.com/de-odex/tlserver.git` in your command line.
+#block(breakable: false)[
+  Pop over to this link #link("https://github.com/de-odex/tlserver")[here] and download the source as a zip, and extract it somewhere.
 
-Alternatively download it from this #link("https://drive.google.com/file/d/1oewBsa-ToGFhqCplZyrkYnVH6covMy9y/view?usp=sharing")[link] for my exact personal setup.
+  Or run `git clone https://github.com/de-odex/tlserver.git` in your command line.
 
-#block[
-  #figure(
-    image("./images/image9.png"),
-  )
+  Alternatively download it from this #link("https://drive.google.com/file/d/1oewBsa-ToGFhqCplZyrkYnVH6covMy9y/view?usp=sharing")[link] for my exact personal setup.
+
+  #block[
+    #figure(
+      image("./images/image9.png"),
+    )
+  ]
 ]
 
 === LM Studio Setup:
-By default LM Studio should be able to detect your GPU, but just in case it doesn’t, we can set it up manually.
 
-Open up LM Studio and run through the setup if you haven’t already.
+#block(breakable: false)[
+  By default LM Studio should be able to detect your GPU, but just in case it doesn’t, we can set it up manually.
 
-Navigate to the bottom right of your window and click on the settings icon (or press `ctrl + ,`).
+  Open up LM Studio and run through the setup if you haven’t already.
 
-#block[
-  #figure(
-    image("./images/image6.png"),
-  )
+  Navigate to the bottom right of your window and click on the settings icon (or press `ctrl + ,`).
+
+  #block[
+    #figure(
+      image("./images/image6.png"),
+    )
+  ]
 ]
 
-From here you’ll be greeted by this window here. Navigate to the runtime tab.
+#block(breakable: false)[
+  From here you’ll be greeted by this window here. Navigate to the runtime tab.
 
-#block[
-  #figure(
-    image("./images/image40.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image40.png"),
+    )
+  ]
 ]
 
-You’ll be greeted by the list of runtimes.
+#block(breakable: false)[
+  You’ll be greeted by the list of runtimes.
 
-#block[
-  #figure(
-    image("./images/image33.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image33.png"),
+    )
+  ]
 ]
 
-For AMD GPUs, you should install the Vulkan engine (you can use ROCm but it lowkey runs like ass on Windows).
+#block(breakable: false)[
+  For AMD GPUs, you should install the Vulkan engine (you can use ROCm but it lowkey runs like ass on Windows).
 
-#block[
-  #figure(
-    image("./images/image13.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image13.png"),
+    )
+  ]
 ]
 
-For NVIDIA GPUs, you should pick CUDA.
-If you get performance issues, try choosing the one that only says "CUDA" and not "CUDA 12".
+#block(breakable: false)[
+  For NVIDIA GPUs, you should pick CUDA.
+  If you get performance issues, try choosing the one that only says "CUDA" and not "CUDA 12".
 
-#block[
-  #figure(
-    image("./images/image7.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image7.png"),
+    )
+  ]
 ]
 
-Then set your engine selection accordingly to which GPU you have.
+#block(breakable: false)[
+  Then set your engine selection accordingly to which GPU you have.
 
-#block[
-  #figure(
-    image("./images/image35.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image35.png"),
+    )
+  ]
 ]
 
-Restart LM Studio if it requires you to, and continue with the next page.
+#block(breakable: false)[
+  Restart LM Studio if it requires you to, and continue with the next page.
 
-Make sure your LM Studio mode is set to Power User or Developer beyond this point (Bottom Left)
+  Make sure your LM Studio mode is set to Power User or Developer beyond this point (Bottom Left)
 
-#block[
-  #figure(
-    image("./images/image1.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image1.png"),
+    )
+  ]
 ]
 
 === Model Choices:
-Now you will need to download a suitable model according to how much VRAM your GPU has.
-Here is my list of recommendations below.
+#block(breakable: false)[
+  Now you will need to download a suitable model according to how much VRAM your GPU has.
+  Here is my list of recommendations below.
 
-==== Best Model Hands Down (courtesy of Mario :3):
-+ Umamusume Story Translator (this changed my life)
+  ==== Best Model Hands Down (courtesy of Mario :3):
+  + Umamusume Story Translator (this changed my life)
 
-==== Low VRAM (Less than 8gb):
-+ Aya Expanse 8B
-+ Shisa Ai v2 Qwen2.5 7B (probably the best one at this range)
-+ Shisa Ai v2 Llama3.1 8B
+  ==== Low VRAM (Less than 8gb):
+  + Aya Expanse 8B
+  + Shisa Ai v2 Qwen2.5 7B (probably the best one at this range)
+  + Shisa Ai v2 Llama3.1 8B
 
-==== Med VRAM (12gb):
-+ Sugoi 14B Ultra (most meta option rn)
+  ==== Med VRAM (12gb):
+  + Sugoi 14B Ultra (most meta option rn)
 
-==== Higher VRAM (+16gb):
-#at.callout(type: "info", style: "compact")[
-  Note that these models are barely any better than Sugoi
-]
-+ Shisa Ai v2 Mistral Nemo 12B
-+ Shisa Ai v2 Unphi4 14B (my personal favourite to use)
-
-Once you’ve decided on a model to use, pop over to the discover tab on LM Studio.
-
-#block[
-  #figure(
-    image("./images/image2.png"),
-  )
+  ==== Higher VRAM (+16gb):
+  #at.callout(type: "info", style: "compact")[
+    Note that these models are barely any better than Sugoi.
+  ]
+  + Shisa Ai v2 Mistral Nemo 12B
+  + Shisa Ai v2 Unphi4 14B (my personal favourite to use)
 ]
 
-You’ll be greeted with this window; you can search up your desired model and select the quantisation for your VRAM size.
+#block(breakable: false)[
+  Once you’ve decided on a model to use, pop over to the discover tab on LM Studio.
 
-#block[
-  #figure(
-    image("./images/image37.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image2.png"),
+    )
+  ]
 ]
 
-Technically, you could download models using other sites like Huggingface, etc. but I'm too lazy to teach and write this wwww.
+#block(breakable: false)[
+  You’ll be greeted with this window; you can search up your desired model and select the quantisation for your VRAM size.
 
-#block[
-  #figure(
-    image("./images/image23.png"),
-    caption: "Shisa Ai v2 Qwen2.5 7B as an example",
-  )
+  #block[
+    #figure(
+      image("./images/image37.png"),
+    )
+  ]
 ]
 
-You should probably listen to the LM Studio recommendation for which model to choose, but you do you.
+#block(breakable: false)[
+  Technically, you could download models using other sites like Huggingface, etc. but I'm too lazy to teach and write this wwww.
 
-#block[
-  #figure(
-    image("./images/image32.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image23.png"),
+      caption: "Shisa Ai v2 Qwen2.5 7B as an example",
+    )
+  ]
 ]
 
-Slap the download button once you're happy and you should see the progress in your download tab.
+#block(breakable: false)[
+  You should probably listen to the LM Studio recommendation for which model to choose, but you do you.
 
-#block[
-  #figure(
-    image("./images/image26.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image32.png"),
+    )
+  ]
+]
+
+#block(breakable: false)[
+  Slap the download button once you're happy and you should see the progress in your download tab.
+
+  #block[
+    #figure(
+      image("./images/image26.png"),
+    )
+  ]
 ]
 
 === Weirdass stuff you gotta do and check:
-Pop over to the developer tab and click on the “select model to load” search bar at the top.
 
-#block[
-  #figure(
-    image("./images/image12.png"),
-  )
+#block(breakable: false)[
+  Pop over to the developer tab and click on the “Select a model to load” search bar at the top.
+
+  #block[
+    #figure(
+      image("./images/image12.png"),
+    )
+  ]
 ]
 
-Load your model of choice.
+#block(breakable: false)[
+  Load your model of choice.
 
-#block[
-  #figure(
-    image("./images/image4.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image4.png"),
+    )
+  ]
 ]
 
-Once loaded, check the model info on the right side of your tab.
+#block(breakable: false)[
+  Once loaded, check the model info on the right side of your tab.
 
-#block[
-  #figure(
-    image("./images/image29.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image29.png"),
+    )
+  ]
 ]
 
-If the model formatting does not match “lm_studio/{modelname}” then we will need to move the model location around (weird LiteLLM shit). Otherwise, skip a couple pages to #link(<tlsrv-setup>)[TLServer Setup].
+#block(breakable: false)[
+  If the model formatting does not match `lm_studio/{modelname}` then we will need to move the model location around (weird LiteLLM shit). Otherwise, skip a couple pages to #link(<tlsrv-setup>)[TLServer Setup].
 
-Pop back into the “My Models” tab and open your model directory in file explorer.
+  Pop back into the “My Models” tab and open your model directory in file explorer.
 
-#block[
-  #figure(
-    image("./images/image10.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image10.png"),
+    )
+  ]
 ]
 
-Ensure that you have an “lm_studio” folder.
-If not, then just make a folder named “lm_studio”.
+#block(breakable: false)[
+  Ensure that you have an `lm_studio` folder.
+  If not, then just make a folder named `lm_studio`.
 
-#block[
-  #figure(
-    image("./images/image41.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image41.png"),
+    )
+  ]
 ]
 
-You want to refer back to the model info to figure out which folder your model is in.
-In my case, since the model is “DevQuasar/shisa-ai.shisa-v2-qwen2.5-7b-GGUF”, that means it will be found in the “DevQuasar” folder.
+#block(breakable: false)[
+  You want to refer back to the model info to figure out which folder your model is in.
+  In my case, since the model is `DevQuasar/shisa-ai.shisa-v2-qwen2.5-7b-GGUF`, that means it will be found in the `DevQuasar` folder.
 
-You should find your model in said folder.
+  You should find your model in said folder.
 
-#block[
-  #figure(
-    image("./images/image8.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image8.png"),
+    )
+  ]
 ]
 
-Make sure the model is unloaded (ejected) in LM Studio.
+#block(breakable: false)[
+  Make sure the model is unloaded (ejected) in LM Studio.
 
-#block[
-  #figure(
-    image("./images/image51.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image51.png"),
+    )
+  ]
+
+  #block[
+    #figure(
+      image("./images/image22.png"),
+    )
+  ]
 ]
 
-#block[
-  #figure(
-    image("./images/image22.png"),
-  )
+#block(breakable: false)[
+  Move the model folder to the `lm_studio` folder from before.
+
+  #block[
+    #figure(
+      image("./images/image30.png"),
+    )
+  ]
 ]
 
-Move the model folder to the “lm_studio” folder from before.
+#block(breakable: false)[
+  Now load the model again in LM Studio and it should work and have the Model set to `lm_studio/{modelname}`.
 
-#block[
-  #figure(
-    image("./images/image30.png"),
-  )
-]
-
-Now load the model again in LM Studio and it should work and have the Model set to “lm_studio/{modelname}”.
-
-#block[
-  #figure(
-    image("./images/image25.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image25.png"),
+    )
+  ]
 ]
 
 === TLServer Setup <tlsrv-setup>
 
-Pop over to where your extracted TLServer folder is.
+#block(breakable: false)[
+  Pop over to where your extracted TLServer folder is.
 
-Open the “config.toml” file with some sort of text editor.
+  Open the `config.toml` file with some sort of text editor.
 
-#block[
-  #figure(
-    image("./images/image17.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image17.png"),
+    )
+  ]
 ]
 
-By default it should have this written in it:
+#block(breakable: false)[
+  By default it should have this written in it:
 
-#block[
-  #figure(
-    image("./images/image16.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image16.png"),
+    )
+  ]
 ]
 
-If you’re using my personal version then you should see the following instead:
+#block(breakable: false)[
+  If you’re using my personal version then you should see the following instead:
 
-#block[
-  #figure(
-    image("./images/image15.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image15.png"),
+    )
+  ]
 ]
 
 ==== What the fuck is a config.toml file?
-Basically you’re telling the server where your LLM server is hosted at and how to use it.
-As a general rule of thumb, at the bare minimum, your config.toml folder should be setup like below:
 
-```toml
-debug = true
-root_port = 8080
+#block(breakable: false)[
+  Basically you’re telling the server where your LLM server is hosted at and how to use it.
+  As a general rule of thumb, at the bare minimum, your config.toml folder should be setup like below:
 
-[[translators]]
-kind = "LLM"
-model_name = "lm_studio/{modelname}"
-api_server = "http://127.0.0.1:1234/v1"
-api_key = "balls"
-system_prompt = ""
-```
+  ```toml
+  debug = true
+  root_port = 8080
+
+  [[translators]]
+  kind = "LLM"
+  model_name = "lm_studio/{modelname}"
+  api_server = "http://127.0.0.1:1234/v1"
+  api_key = "balls"
+  system_prompt = ""
+  ```
+]
 
 ===== Explanation of each variable
 *api_server* - basically just where your LM Studio instance is hosted. You can just set it to “http://127.0.0.1:1234/v1” and it should work.
@@ -528,17 +611,22 @@ system_prompt = ""
 *system_prompt* - Instructions on what the LLM is meant to do, how it translates text, and specific dictionary references. For lower end models, I would also highly suggest adding a dictionary so that the LLM doesn’t have a stroke trying to translate character names.
 
 ==== LLM Model Config Suggestions
-If your suggested model config uses Top P, convert it into Min P:
-$ 1 – "Top P" = "Min P" $
 
-*Shisa V2 Variants:*
-Running sampler sweeps, we found the models operate well across a variety of temperatures in most settings. For translation tasks specifically, we recommend a lower temperature (0.2) to increase accuracy. To prevent cross-lingual token leakage we recommend a min_p of 0.1.
+#block(breakable: false)[
+  If your suggested model config uses Top P, convert it into Min P:
+  $ 1 – "Top P" = "Min P" $
 
-*Sugoi 14B:*
-- *Low Temperature*: `0.1`
-- *Top K*: `40`
-- *Min P*: `0.05`
-- *Repetition Penalty*: `1.1`
+  *Shisa V2 Variants:*
+  Running sampler sweeps, we found the models operate well across a variety of temperatures in most settings. For translation tasks specifically, we recommend a lower temperature (0.2) to increase accuracy. To prevent cross-lingual token leakage we recommend a min_p of 0.1.
+  - *Temperature*: `0.2`
+  - *Min P*: `0.1`
+
+  *Sugoi 14B:*
+  - *Temperature*: `0.1`
+  - *Top K*: `40`
+  - *Min P*: `0.05`
+  - *Repetition Penalty*: `1.1`
+]
 
 ==== Dictionary guide:
 In your system prompt, you can specify a dictionary for the LLM to use on how to translate specific names or characters. This is highly important for LLMs with a lower parameter size.
@@ -609,29 +697,33 @@ Provide only the translated English text, formatted as plain text, without any a
 Do not provide additional context or information for a given translation. Just only reply with the translation and nothing else
 ```
 
-Once your “config.toml” file is set up, boot up Command Prompt and `cd` to your TLServer directory.
+#block(breakable: false)[
+  Once your `config.toml` file is set up, boot up Command Prompt and `cd` to your TLServer directory.
 
-Run the command “uv run tlserver”.
+  Run the command `uv run tlserver`.
 
-#block[
-  #figure(
-    image("./images/image3.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image3.png"),
+    )
+  ]
 ]
 
-If all goes well you should see something like this:
+#block(breakable: false)[
+  If all goes well you should see something like this:
 
-#block[
-  #figure(
-    image("./images/image24.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image24.png"),
+    )
+  ]
 ]
 
 = Getting Auto Translations to work in Hachimi
-Open up your config.json file in “game_directory/hachimi”
+Open up your config.json file in `Umamusume/hachimi`
 
 == For Sugoi Offline:
-Now, depending on what you copied earlier from the “User-Setting.json” file, the link that you put in will be different.
+Now, depending on what you copied earlier from the `User-Setting.json` file, the link that you put in will be different.
 
 Replace `null` with `[“http://127.0.0.1:(COPIED-PORT)”]`. In my case it will be `[“http://127.0.0.1:14466”]`.
 
@@ -639,65 +731,79 @@ Replace `null` with `[“http://127.0.0.1:(COPIED-PORT)”]`. In my case it will
 Set `Sugoi_url` to `[“http://127.0.0.1:14368”]`.
 
 == The Fun Part Begins Here:
-Test if there are any issues with your Sugoi server by opening up your game and navigating to the story tab.
 
-#block[
-  #figure(
-    image("./images/image45.png"),
-  )
+#block(breakable: false)[
+  Test if there are any issues with your Sugoi server by opening up your game and navigating to the story tab.
+
+  #block[
+    #figure(
+      image("./images/image45.png"),
+    )
+  ]
 ]
 
-Open up Hachimi's GUI and the config editor. Scroll down and tick “Auto Translate Stories”.
+#block(breakable: false)[
+  Open up Hachimi's GUI and the config editor. Scroll down and tick “Auto Translate Stories”.
 
-#block[
-  #figure(
-    image("./images/image36.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image36.png"),
+    )
+  ]
 ]
 
 Press save.
 
-Now pick an untranslated story of your choice (for this guide I’ll be using Still In Love).
+#block(breakable: false)[
+  Now pick an untranslated story of your choice (for this guide I’ll be using Still In Love).
 
-#block[
-  #figure(
-    image("./images/image48.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image48.png"),
+    )
+  ]
 ]
 
-Click on an episode and view it.
+#block(breakable: false)[
+  Click on an episode and view it.
 
-#block[
-  #figure(
-    image("./images/image19.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image19.png"),
+    )
+  ]
 ]
 
-The game should freeze for a moment. Check your Sugoi Server's Command Prompt and check if it has received any requests (it should look like the one below).
+#block(breakable: false)[
+  The game should freeze for a moment. Check your Sugoi Server's Command Prompt and check if it has received any requests (it should look like the one below).
 
-#block[
-  #figure(
-    image("./images/image50.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image50.png"),
+    )
+  ]
 ]
 
-Once your game unfreezes, the Sugoi server command prompt should look like this.
-Your story should be translated now!
+#block(breakable: false)[
+  Once your game unfreezes, the Sugoi server command prompt should look like this.
+  Your story should be translated now!
 
-#block[
-  #figure(
-    image("./images/image43.png"),
-  )
+  #block[
+    #figure(
+      image("./images/image43.png"),
+    )
+  ]
+
+  #block[
+    #figure(
+      image("./images/image49.png"),
+    )
+  ]
+
+  It is recommended that you only turn on auto translate stories for sections you actually care about, otherwise your game will turn into an unenjoyable laggy mess.
 ]
 
-#block[
-  #figure(
-    image("./images/image49.png"),
-  )
-]
-
-It is recommended that you only turn on auto translate stories for sections you actually care about, otherwise your game will turn into an unenjoyable laggy mess.
-
+#pagebreak(weak: true)
 = Mobile? (Not really):
 This isn’t really recommended right now due to the inability to use the Hachimi GUI on Android
 
