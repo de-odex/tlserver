@@ -27,45 +27,65 @@
 
 #set heading(numbering: none)
 
-#show heading.where(level: 1): it => block(
-  above: 2em,
-  below: 0.65em,
-)[
-  #set text(font: "Nunito Sans 12pt", size: 21pt, weight: "bold")
-  #it.body
-]
+#show heading.where(level: 1): set text(
+  font: "Nunito Sans 12pt",
+  size: 21pt,
+  weight: "bold",
+)
+#show heading.where(level: 1): set par(leading: 0.15em)
+#show heading.where(level: 1): set block(
+  above: 26pt,
+  below: 10pt,
+  sticky: true,
+)
 
-#show heading.where(level: 2): it => block(
-  above: 1.5em,
-  below: 0.5em,
-)[
-  #set text(font: "Nunito Sans 12pt", size: 16pt, weight: "bold")
-  #it.body
-]
+#show heading.where(level: 2): set text(
+  font: "Nunito Sans 12pt",
+  size: 18pt,
+  weight: "bold",
+)
+#show heading.where(level: 2): set par(leading: 0.2em)
+#show heading.where(level: 2): set block(
+  above: 20pt,
+  below: 8pt,
+  sticky: true,
+)
 
-#show heading.where(level: 3): it => block(
-  above: 1.15em,
-  below: 0.4em,
-)[
-  #set text(font: "Nunito Sans 12pt", size: 13pt, weight: "bold")
-  #it.body
-]
+#show heading.where(level: 3): set text(
+  font: "Nunito Sans 12pt",
+  size: 16pt,
+  weight: "bold",
+)
+#show heading.where(level: 3): set par(leading: 0.25em)
+#show heading.where(level: 3): set block(
+  above: 16pt,
+  below: 7pt,
+  sticky: true,
+)
 
-#show heading.where(level: 4): it => block(
-  above: 0.95em,
-  below: 0.35em,
-)[
-  #set text(font: "Nunito Sans 12pt", size: 11.5pt, weight: "bold")
-  #it.body
-]
+#show heading.where(level: 4): set text(
+  font: "Nunito Sans 12pt",
+  size: 14pt,
+  weight: "bold",
+)
+#show heading.where(level: 4): set par(leading: 0.3em)
+#show heading.where(level: 4): set block(
+  above: 13pt,
+  below: 6pt,
+  sticky: true,
+)
 
-#show heading.where(level: 5): it => block(
-  above: 0.8em,
-  below: 0.3em,
-)[
-  #set text(font: "Nunito Sans 12pt", size: 10.5pt, weight: "bold")
-  #it.body
-]
+#show heading.where(level: 5): set text(
+  font: "Nunito Sans 12pt",
+  size: 12pt,
+  weight: "bold",
+)
+#show heading.where(level: 5): set par(leading: 0.35em)
+#show heading.where(level: 5): set block(
+  above: 10pt,
+  below: 6pt,
+  sticky: true,
+)
 
 #show link: set text(fill: blue)
 #show link: underline
@@ -555,3 +575,34 @@ Save the config file and go to your game.
 Your game may or may not be super laggy or stuttery. This is the main downside of using auto translate with the current state of hachimi on android.
 
 Repeat the same testing step as the previous page and enjoy.
+
+
+= heading
+== heading
+=== heading
+==== heading
+===== heading
+a paragraph
+
+another paragraph
+
+= heading
+a paragraph
+
+another paragraph
+== heading
+a paragraph
+
+another paragraph
+=== heading
+a paragraph
+
+another paragraph
+==== heading
+a paragraph
+
+another paragraph
+===== heading
+a paragraph
+
+another paragraph
