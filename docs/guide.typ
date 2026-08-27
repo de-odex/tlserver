@@ -5,7 +5,12 @@
 
 #show: codly-init.with()
 
-#codly(languages: codly-languages)
+#codly(
+  languages: codly-languages,
+  number-format: none,
+  display-icon: false,
+  display-name: false,
+)
 
 // Keep Japanese glyphs in code monospaced and legible.
 #show raw: set text(font: ("Fantasque Sans Mono", "Noto Sans Mono CJK JP"))
@@ -127,6 +132,12 @@
 
 #v(2em)
 
+#at.callout(type: "info", style: "quarto")[
+  This is the original guide from Spoot for Hachimi Auto Translate.
+
+  I (odexine/Rika) have another guide specifically for TLServer (link pending), so the information on TLServer may be outdated in this guide.
+]
+
 #at.callout(type: "warning", style: "quarto")[
   This requires a half decent device to run, as this is run locally using your pc’s CPU/GPU (depending on your choice). This will also cause your game to freeze/lag a lot more.
 ]
@@ -152,7 +163,7 @@ For this guide, I will be using a trimmed down #link("https://lunatranslator.org
 == (Optional) If you have an NVIDIA GPU and want to use it to run translations:
 
 #block(breakable: false)[
-  Download the gpu installer #link("https://drive.google.com/file/d/1d6logK9H25Q5pqNmstLFUO2JeUCiwFW7/view?usp=sharing")[here] and extract the folder somewhere.
+  Download the GPU installer #link("https://drive.google.com/file/d/1d6logK9H25Q5pqNmstLFUO2JeUCiwFW7/view?usp=sharing")[here] and extract the folder somewhere.
 
   #block[
     #figure(
@@ -160,14 +171,14 @@ For this guide, I will be using a trimmed down #link("https://lunatranslator.org
     )
   ]
 
-  Run the “run–install-cuda.bat” file and continue with the command prompt instructions.
+  Run the `run–install-cuda.bat` file and continue with the command prompt instructions.
 ]
 
 == Main Guide
 === If using the Sugoi install linked in this doc:
 
 #block(breakable: false)[
-  Navigate to your Sugoi folder and run the “run.bat” file.
+  Navigate to your Sugoi folder and run the `run.bat` file.
 
   #block[
     #figure(
@@ -189,7 +200,7 @@ For this guide, I will be using a trimmed down #link("https://lunatranslator.org
 === If using any other version of Sugoi (The below is using V14 as an example):
 
 #block(breakable: false)[
-  Navigate to your Sugoi folder and run the “Sugoi-Translator-Toolkit (click here).bat” file.
+  Navigate to your Sugoi folder and run the `Sugoi-Translator-Toolkit (click here).bat` file.
 
   #block[
     #figure(
@@ -218,15 +229,15 @@ For this guide, I will be using a trimmed down #link("https://lunatranslator.org
   ]
 ]
 
-// FIXME: heading too long
+// FIXME: heading too long (spoot im obliterating your balls)
 === Unless your Sugoi server is running at a different port, you should not need to do this step (This is specifically for every other version that’s not the V12 listed in the doc earlier) Skip to Next step if using the doc’s V12:
 
 #block(breakable: false)[
-  To find which port your server is running at, navigate to “Sugoi/Code” and look for the “User-Settings.json” file.
+  To find which port your server is running at, navigate to `Sugoi/Code` and look for the `User-Settings.json` file.
 
-  Open up the JSON file and look for a list starting with [“Offline”].
+  Open up the JSON file and look for a list starting with `[“Offline”]`.
 
-  Now look at the value set as "HTTP_port_number” and copy the value (in this case, 14366)
+  Now look at the value set as `HTTP_port_number` and copy the value (in this case, `14366`).
 
   #block[
     #figure(
@@ -246,7 +257,7 @@ For this guide, I will be using a trimmed down #link("https://lunatranslator.org
 ]
 
 #block(breakable: false)[
-  Open the config.json file and find “sugoi_url”, it should be set to null by default
+  Open the `config.json` file and find `sugoi_url`, it should be set to `null` by default.
 
   #block[
     #figure(
@@ -267,7 +278,7 @@ Credits to Rika for the TLServer :3
   // FIXME: a better (easier) installation method than this
   Download #link("https://www.python.org/downloads/release/python-3110/")[Python 3.11] and make sure it is added to the system path on install.
 
-  Download #link("https://docs.astral.sh/uv/")[uv] by running “pip install uv” in your commandline.
+  Download #link("https://docs.astral.sh/uv/")[uv] by running `pip install uv` in a command prompt.
 
   You will also need to install LM Studio (or any other OpenAI compatible backends, etc).
 
@@ -360,7 +371,7 @@ Credits to Rika for the TLServer :3
 #block(breakable: false)[
   Restart LM Studio if it requires you to, and continue with the next page.
 
-  Make sure your LM Studio mode is set to Power User or Developer beyond this point (Bottom Left)
+  Make sure your LM Studio mode is set to Power User or Developer beyond this point (Bottom Left).
 
   #block[
     #figure(
@@ -646,56 +657,7 @@ Translate the below words accordingly
 - "アストンマーチャン" as "Aston Machan" or if the shortened form is presented "アストンマ" translate it as "Machan", not marchan
 ```
 
-Here is my system_prompt that I use. Feel free to adjust it accordingly.
-```markdown
-# Role and Objective
-You are a high-speed, silent, raw text translation API. Your sole purpose is to receive Japanese text and return the direct English translation, delivering accurate and culturally sensitive translations for the game "Uma Musume: Pretty Derby with maximum speed and efficiency.
-- Demonstrate strong familiarity with the game's characters, terminology, and horse racing references.
-
-**Core Directives:**
-1.  **Prioritize Speed & Brevity:** Your primary goal is to respond with the minimum number of tokens required for an accurate translation.
-2.  **Output Purity:** Your response MUST contain only the direct English translation. Nothing else.
-3.  **Forbidden Content:** Do not include any explanations, reasoning, comments, apologies, or conversational filler. You are a tool, not an assistant.
-
-**Example of Exact Format:**
-User: こんにちは
-Assistant: Hello
-
-# Task Checklist
-- Identify context, character names, and specialised terminology in the source text.
-- Preserve original meaning, nuance, and tone in fluent English.
-- Adapt jokes and cultural references for English audiences while retaining Japanese-specific humour if present.
-- Maintain all Japanese honorifics, punctuation, placeholder tags, emoji, and emoticons exactly as in the source material.
-- Use British English spelling and conventions exclusively.
-- Translate cultural terms and onomatopoeia according to provided instructions or established guidelines.
-
-# Instructions
-- Output only the translated English text; do not include commentary, explanations, or extraneous information.
-- Apply reasoning_effort = medium to ensure thorough but efficient handling of text complexity.
-- Express the meaning and nuance of the source text faithfully; use colloquial expressions or slang only if they appear in the Japanese source.
-- Appropriately adapt jokes and cultural references, retaining Japanese humour when present in the original.
-- Preserve Japanese honorifics (e.g., -san, -sama, -kun) exactly as written.
-- Retain original punctuation, including Japanese quotation marks, only if present in the source text.
-- Translate ambiguous sentences in the most plausible manner; do not request clarification unless critical ambiguity prevents a reasonable translation.
-- Match the register, formality, and regional speech patterns of characters in English.
-- Use British English conventions consistently.
-- Apply Hepburn romanisation with macrons for all relevant names and terms except honorifics.
-- Romanise onomatopoeic expressions directly from the original.
-- Reflect regional dialects and unique speech patterns, adapting them into English to preserve character voice (e.g., Kansai dialect, feminine speech).
-- For culturally specific concepts without direct English equivalents, provide a brief parenthetical explanation inline (e.g., omiai (arranged meeting)).
-- Preserve tags in angle brackets (e.g., `<username>`, `<chrname>`) and percent-encoded forms (e.g., `%a_h_pop1`, `%h_rank1`) exactly as given.
-- Keep all emoji and emoticons unchanged.
-- The Trainer character may be either male or female; unless specified in the source, translate Trainer dialogue and references using gender-neutral English.
-- All horsegirls are female characters and should be referred to as "she/her" unless otherwise specified in the source.
-
-# Dictionary
-Translate the below words accordingly
-- "トレセン学園" as Tracen Academy and as a Proper Noun
-- "ウマ娘" as "Uma Musume" and when referring to the game title as a common noun.
-# Output Format
-Provide only the translated English text, formatted as plain text, without any added comments or notes.
-Do not provide additional context or information for a given translation. Just only reply with the translation and nothing else
-```
+The `system_prompt` I use for translating can be found in the shared folder. Feel free to adjust it accordingly.
 
 #block(breakable: false)[
   Once your `config.toml` file is set up, boot up Command Prompt and `cd` to your TLServer directory.
@@ -720,7 +682,7 @@ Do not provide additional context or information for a given translation. Just o
 ]
 
 = Getting Auto Translations to work in Hachimi
-Open up your config.json file in `Umamusume/hachimi`
+Open up your config.json file in `Umamusume/hachimi`.
 
 == For Sugoi Offline:
 Now, depending on what you copied earlier from the `User-Setting.json` file, the link that you put in will be different.
@@ -775,7 +737,7 @@ Press save.
 ]
 
 #block(breakable: false)[
-  The game should freeze for a moment. Check your Sugoi Server's Command Prompt and check if it has received any requests (it should look like the one below).
+  The game should freeze for a moment. Check your Sugoi Server's command prompt and check if it has received any requests (it should look like the one below).
 
   #block[
     #figure(
@@ -805,7 +767,7 @@ Press save.
 
 #pagebreak(weak: true)
 = Mobile? (Not really):
-This isn’t really recommended right now due to the inability to use the Hachimi GUI on Android
+This isn’t really recommended right now due to the inability to use the Hachimi GUI on Android.
 
 After setting up the server using the above steps, you can also use this for the Android version of the game, as long as the server is on.
 
@@ -819,7 +781,7 @@ IDK how to do this, figure it out yourselves.
 
 You have to do this step every time the Sugoi server is started.
 
-(this also works if you wanna share your Sugoi server with someone else)
+(this also works if you wanna share your Sugoi server with someone else).
 
 Open Command Prompt and type in `winget install --id Cloudflare.cloudflared` and press enter.
 
@@ -837,7 +799,7 @@ Next, Cloudflare will spit out a link for you. Copy this one and place it somewh
 
 Open your mobile device and navigate to `android/media/umamusume/hachimi` and open up the config.json file with a JSON editor.
 
-Look for `auto_translate_stories` and set it from `false` to `true`
+Look for `auto_translate_stories` and set it from `false` to `true`.
 
 Next, set the `sugoi_url` from `null` to the cloudflare address generated from before. In my case it would be “https://doctor-maria-cigarettes-max.trycloudflare.com”.
 
