@@ -69,6 +69,8 @@
           fonts = [
             pkgs.atkinson-hyperlegible-next
             pkgs.fantasque-sans-mono
+            pkgs.noto-fonts-cjk-sans
+            pkgs.noto-fonts-cjk-serif
             (pkgs.google-fonts.override {
               fonts = [
                 "Arvo"
