@@ -1,0 +1,1 @@
+- fix disctionary guide
