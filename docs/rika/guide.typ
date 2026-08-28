@@ -332,7 +332,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/Screenshot_20260828_045759_LM Studio.png"),
+        image("./images/Screenshot_20260828_045759_LM Studio (1).png"),
       )
     ]
   ]
@@ -342,13 +342,19 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/Screenshot_20260828_045737_LM Studio.png"),
+        image("./images/Screenshot_20260828_045737_LM Studio (1).png"),
       )
     ]
   ]
 
   - #block(breakable: false)[
-      For AMD GPUs, you should install the Vulkan engine (you can use ROCm but it lowkey runs like ass on Windows).
+      For AMD GPUs, you should install the ROCm engine (Spoot used to recommend Vulkan but we dwell not in the days of yore). If ROCm causes issues or you're on an older AMD GPU, use Vulkan instead.
+
+      #block(width: 100%)[
+        #figure(
+          image("./images/Screenshot_20260828_045830.png"),
+        )
+      ]
 
       #block(width: 100%)[
         #figure(
@@ -436,7 +442,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/Screenshot_20260828_051329_LM Studio.png"),
+        image("./images/Screenshot_20260828_051329_LM Studio (1).png"),
       )
     ]
   ]
@@ -446,7 +452,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/Screenshot_20260828_051408_LM Studio.png"),
+        image("./images/Screenshot_20260828_051408_LM Studio (1).png"),
         caption: "Hy-MT2 as an example",
       )
     ]
@@ -461,6 +467,18 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
       )
     ]
   ]
+  - #block(breakable: false)[
+      If you have VRAM under 4 GB, this is where we choose `Q4_K_M`.
+      Pray to whichever deities you believe in that these icons are shown:
+
+      #block(width: 100%)[
+        #figure(
+          image("./images/Screenshot_20260828_184322.png"),
+        )
+      ]
+
+      If not, that's fine, but you will not have a fun time, as translations will be very slow. I'd recommend opening Spoot's guide and following the instructions for Sugoi Offline Translator instead.
+    ]
 
 + #block(breakable: false)[
     Slap the download button once you're happy and you should see the progress in your download tab.
@@ -498,7 +516,9 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
   ]
 
 + #block(breakable: false)[
-    If you’re using my personal version then you should see the following instead:
+    I made a config file with good defaults which you can just download and place in the folder.
+
+    You can find it in the folder you found this guide, named `config.toml`
 
     #block(width: 100%)[
       #figure(
@@ -510,8 +530,8 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 == What the fuck is a config.toml file?
 
 #block(breakable: false)[
-  Basically you’re telling the server where your LLM server is hosted at and how to use it.
-  As a general rule of thumb, at the bare minimum, your config.toml folder should be setup like below:
+  Basically you’re telling TLServer where your LLM server is hosted at and how to use it.
+  As a general rule of thumb, at the bare minimum, your `config.toml` should be setup like below:
 
   ```toml
   debug = true
