@@ -269,11 +269,11 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 + Open up LM Studio and run through the setup if you haven’t already.
 
 + #block(breakable: false)[
-    Navigate to the bottom right of your window and click on the settings icon (or press `ctrl + ,`).
+    Navigate to the bottom left of your window and click on the settings icon (or press `ctrl + ,`).
 
     #block(width: 100%)[
       #figure(
-        image("./images/image6.png"),
+        image("./images/Screenshot_20260828_045614.png"),
       )
     ]
   ]
@@ -283,7 +283,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/image40.png"),
+        image("./images/Screenshot_20260828_045759_LM Studio.png"),
       )
     ]
   ]
@@ -293,7 +293,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/image33.png"),
+        image("./images/Screenshot_20260828_045737_LM Studio.png"),
       )
     ]
   ]
@@ -303,7 +303,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
       #block(width: 100%)[
         #figure(
-          image("./images/image13.png"),
+          image("./images/Screenshot_20260828_050104.png"),
         )
       ]
     ]
@@ -314,7 +314,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
       #block(width: 100%)[
         #figure(
-          image("./images/image7.png"),
+          image("./images/Screenshot_20260828_045853.png"),
         )
       ]
     ]
@@ -324,7 +324,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/image35.png"),
+        image("./images/Screenshot_20260828_050149.png"),
       )
     ]
   ]
@@ -332,44 +332,52 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 + #block(breakable: false)[
     Restart LM Studio if it requires you to, and continue with the next page.
 
-    Make sure your LM Studio mode is set to Power User or Developer beyond this point (Bottom Left).
+    Make sure your LM Studio mode is set to Developer beyond this point (Settings > Developer > Developer Mode).
 
     #block(width: 100%)[
       #figure(
-        image("./images/image1.png"),
+        image("./images/Screenshot_20260828_050238.png"),
       )
     ]
   ]
 
 + #block(breakable: false)[
     Now you will need to download a suitable model according to how much VRAM your GPU has.
-    Here is my list of recommendations below.
 
-    *Best Model Hands Down (courtesy of Mario :3)*
-    - Umamusume Story Translator (this changed my life)
+    These are the models I (Rika) recommend:
+    - If you have 16 or more GB VRAM: *Hy MT2 7B*, GGUF format
+    - If you have 8 or more GB VRAM: *Hy MT2 1.8B*, GGUF format
+    - If you have 4 or less GB VRAM: *Good luck.* Try loading Hy MT2 1.8B and see if the `Q4_K_M` quantisation fits; we'll elaborate on that in the next step.
 
-    *Low VRAM (Less than 8gb)*
-    - Aya Expanse 8B
-    - Shisa Ai v2 Qwen2.5 7B (probably the best one at this range)
-    - Shisa Ai v2 Llama3.1 8B
+    Spoot recommended these models; they're a couple of years old and may perform worse than the ones I recommend:
 
-    *Med VRAM (12gb)*
-    - Sugoi 14B Ultra (most meta option rn)
+    #text(fill: black.lighten(50%))[
+      *Best Model Hands Down (courtesy of Mario :3)*
+      - Umamusume Story Translator (this changed my life)
 
-    *Higher VRAM (+16gb)* \
-    #callout(type: "info", style: "compact")[
-      Note that these models are barely any better than Sugoi.
+      *Low VRAM (Less than 8gb)*
+      - Aya Expanse 8B
+      - Shisa Ai v2 Qwen2.5 7B (probably the best one at this range)
+      - Shisa Ai v2 Llama3.1 8B
+
+      *Med VRAM (12gb)*
+      - Sugoi 14B Ultra (most meta option rn)
+
+      *Higher VRAM (+16gb)* \
+      #callout(type: "info", style: "compact")[
+        Note that these models are barely any better than Sugoi.
+      ]
+      - Shisa Ai v2 Mistral Nemo 12B
+      - Shisa Ai v2 Unphi4 14B (my personal favourite to use)
     ]
-    - Shisa Ai v2 Mistral Nemo 12B
-    - Shisa Ai v2 Unphi4 14B (my personal favourite to use)
   ]
 
 + #block(breakable: false)[
-    Once you’ve decided on a model to use, pop over to the discover tab on LM Studio.
+    Once you’ve decided on a model to use, pop over to the Model Search tab on LM Studio.
 
     #block(width: 100%)[
       #figure(
-        image("./images/image2.png"),
+        image("./images/Screenshot_20260828_051217.png"),
       )
     ]
   ]
@@ -379,7 +387,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/image37.png"),
+        image("./images/Screenshot_20260828_051329_LM Studio.png"),
       )
     ]
   ]
@@ -389,8 +397,8 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/image23.png"),
-        caption: "Shisa Ai v2 Qwen2.5 7B as an example",
+        image("./images/Screenshot_20260828_051408_LM Studio.png"),
+        caption: "Hy-MT2 as an example",
       )
     ]
   ]
@@ -400,7 +408,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/image32.png"),
+        image("./images/Screenshot_20260828_051556.png"),
       )
     ]
   ]
@@ -410,111 +418,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
     #block(width: 100%)[
       #figure(
-        image("./images/image26.png"),
-      )
-    ]
-  ]
-
-== Weirdass stuff you gotta do and check
-
-+ #block(breakable: false)[
-    Pop over to the developer tab and click on the “Select a model to load” search bar at the top.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image12.png"),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    Load your model of choice.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image4.png", width: 80%),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    Once loaded, check the model info on the right side of your tab.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image29.png", width: 60%),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    If the model formatting does not match `lm_studio/{modelname}` then we will need to move the model location around (weird LiteLLM shit). Otherwise, skip a couple pages to #link(<tlsrv-setup>)[TLServer Setup].
-
-    Pop back into the “My Models” tab and open your model directory in file explorer.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image10.png"),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    Ensure that you have an `lm_studio` folder.
-    If not, then just make a folder named `lm_studio`.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image41.png"),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    You want to refer back to the model info to figure out which folder your model is in.
-    In my case, since the model is `DevQuasar/shisa-ai.shisa-v2-qwen2.5-7b-GGUF`, that means it will be found in the `DevQuasar` folder.
-
-    You should find your model in said folder.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image8.png"),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    Make sure the model is unloaded (ejected) in LM Studio.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image51.png"),
-      )
-    ]
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image22.png"),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    Move the model folder to the `lm_studio` folder from before.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image30.png"),
-      )
-    ]
-  ]
-
-+ #block(breakable: false)[
-    Now load the model again in LM Studio and it should work and have the Model set to `lm_studio/{modelname}`.
-
-    #block(width: 100%)[
-      #figure(
-        image("./images/image25.png"),
+        image("./images/Screenshot_20260828_051633.png"),
       )
     ]
   ]
@@ -566,41 +470,66 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 
   [[translators]]
   kind = "LLM"
-  model_name = "lm_studio/{modelname}"
-  api_server = "http://127.0.0.1:1234/v1"
-  api_key = "balls"
-  system_prompt = ""
+  model_name = "lm_studio/{your model's name}"
+  # api_server = "http://127.0.0.1:1234/v1"
   ```
 ]
 
 === Explanation of each variable
-*api_server* - basically just where your LM Studio instance is hosted. You can just set it to “http://127.0.0.1:1234/v1” and it should work.
+*api_server* - Basically just where your LM Studio instance is hosted. If you changed this setting in LM Studio, you have to uncomment and set it here too. Otherwise, don't change anything.
 
-*model_name* - name of the model your using in LM Studio. Should be in the format “lm_studio/modelname”.
+#block(breakable: false)[
+  *model_name* - Name of the model you're using in LM Studio. Should be in the format “lm_studio/{your model's name}”. You can find your model name in this screen:
 
-*api_key* - This isn’t really used at all for LM Studio but LiteLLM requires something in here for it to work, so just set it to whatever you want lol.
+  #block(width: 100%)[
+    #figure(
+      image("./images/Screenshot_20260828_045043.png"),
+      caption: [In this example, the `model_name` should be `lm_studio/tencent/Hy-MT2-7B-GGUF`],
+    )
+  ]
+]
 
-*system_prompt* - Instructions on what the LLM is meant to do, how it translates text, and specific dictionary references. For lower end models, I would also highly suggest adding a dictionary so that the LLM doesn’t have a stroke trying to translate character names.
+*system_prompt* - Instructions on what the LLM is meant to do, how it translates text, and specific dictionary references. You only need to set it if you're not using my config, or if you know what you're doing.
 
 == LLM Model Config Suggestions
 
 #block(breakable: false)[
-  If your suggested model config uses Top P, convert it into Min P:
-  $ 1 – "Top P" = "Min P" $
+  //If your suggested model config uses Top P, convert it into Min P:
+  //$ 1 – "Top P" = "Min P" $
 
-  *Shisa V2 Variants:*
-  Running sampler sweeps, we found the models operate well across a variety of temperatures in most settings. For translation tasks specifically, we recommend a lower temperature (0.2) to increase accuracy. To prevent cross-lingual token leakage we recommend a min_p of 0.1.
-  - *Temperature*: `0.2`
-  - *Min P*: `0.1`
+  For my recommended models:
 
-  *Sugoi 14B:*
-  - *Temperature*: `0.1`
-  - *Top K*: `40`
-  - *Min P*: `0.05`
-  - *Repetition Penalty*: `1.1`
+  *Hy MT2*:
+  All variants can use the same settings:
+  - *Temperature*: `0.7`
+  - *Top K*: `20`
+  - *Top P*: ticked on, `0.6`
+  - *Min P*: ticked off
+  - *Repetition Penalty*: ticked on, 1.05
+
+  I also recommend setting these:
+  - *Context Length*: As much as you can fit. I have a 16 GB GPU that can fit `32768` tokens, using up 2 GB extra VRAM. `8192` might be a good starting value, increase to `16384` if you can.
+
+  For Spoot's recommended models:
+
+  #text(fill: black.lighten(50%))[
+    *Shisa V2 Variants:*
+    Running sampler sweeps, we found the models operate well across a variety of temperatures in most settings. For translation tasks specifically, we recommend a lower temperature (0.2) to increase accuracy. To prevent cross-lingual token leakage we recommend a min_p of 0.1.
+    - *Temperature*: `0.2`
+    - *Min P*: `0.1`
+
+    *Sugoi 14B:*
+    - *Temperature*: `0.1`
+    - *Top K*: `40`
+    - *Min P*: `0.05`
+    - *Repetition Penalty*: `1.1`
+  ]
 ]
 
 == Dictionary guide:
+#callout(type: "warning")[
+  TODO
+]
 In your system prompt, you can specify a dictionary for the LLM to use on how to translate specific names or characters. This is highly important for LLMs with a lower parameter size.
 
 You should run auto translation with a basic or no dictionary on a story once and reference the translations outputted in the command line to see what phrases or words might need a
