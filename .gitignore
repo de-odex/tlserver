@@ -9,4 +9,14 @@ wheels/
 # Virtual environments
 .venv/
 
+# Test and coverage output
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Local development environment
+.direnv/
+.envrc
+
 assets/
