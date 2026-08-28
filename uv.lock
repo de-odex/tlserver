@@ -2494,6 +2494,7 @@ source = { editable = "." }
 dependencies = [
     { name = "ctranslate2" },
     { name = "hypercorn" },
+    { name = "jinja2" },
     { name = "litellm" },
     { name = "loguru" },
     { name = "pydantic" },
@@ -2517,6 +2518,7 @@ dev = [
 requires-dist = [
     { name = "ctranslate2", specifier = "~=4.2" },
     { name = "hypercorn", specifier = "~=0.14" },
+    { name = "jinja2", specifier = ">=3.1.6" },
     { name = "litellm", specifier = "~=1.67" },
     { name = "loguru", specifier = "~=0.7" },
     { name = "pydantic", specifier = ">=2.11.7" },
