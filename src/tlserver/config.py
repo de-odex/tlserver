@@ -250,12 +250,14 @@ class LLMTranslatorSettings(TranslatorSettingsBase):
     api_key: SecretStr = SecretStr("sk-fakefakefake")
     system_prompt: str = (
         "You are a professional translator whose primary goal is to "
-        "precisely translate {input_language} to {output_language}. "
+        "precisely translate {{ input_language }} to {{ output_language }}. "
         "You can speak colloquially if it makes the translation more accurate. "
-        "Only respond in {output_language}. "
-        "If you are unsure of a {input_language} sentence, still always try your best "
-        "estimate to respond with a complete {output_language} translation."
+        "Only respond in {{ output_language }}. "
+        "If you are unsure of a {{ input_language }} sentence, "
+        "still always try your best estimate to respond with "
+        "a complete {{ output_language }} translation."
     )
+    message_template: str = "{{ text }}"
     context_lines: int = 50
     temperature: float = 0.4
     top_p: float = 0.95

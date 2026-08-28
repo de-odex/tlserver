@@ -173,7 +173,7 @@ def make_llm_config(**kwargs: object) -> LLMTranslatorSettings:
     return LLMTranslatorSettings(
         kind="LLM",
         port=19002,
-        system_prompt="Translate {input_language} to {output_language}",
+        system_prompt="Translate {{ input_language }} to {{ output_language }}",
         **kwargs,
     )
 

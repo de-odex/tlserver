@@ -2,10 +2,17 @@ from functools import partial
 
 import litellm
 import trio
+from jinja2 import Environment, StrictUndefined, select_autoescape
 from loguru import logger
 
 from tlserver.config import LLMTranslatorSettings
 from tlserver.pipeline import TranslationPipeline
+from tlserver.processor import TranslationContext
+
+template_environment = Environment(
+    autoescape=select_autoescape(default_for_string=False),
+    undefined=StrictUndefined,
+)
 
 
 class LLMTranslator:
@@ -19,20 +26,29 @@ class LLMTranslator:
 
         self.pipeline = TranslationPipeline(config.preprocessors, config.postprocessors)
 
-        self.system_prompt = self.config.system_prompt
+        self.system_prompt = ""
+        self.system_prompt_template = template_environment.from_string(
+            self.config.system_prompt
+        )
+        self.message_template = template_environment.from_string(
+            self.config.message_template
+        )
 
         self._process_system_prompt()
 
     def _process_system_prompt(self) -> None:
         self.messages = []
-        substitutions = {}
-        if "{input_language}" in self.config.system_prompt:
-            substitutions["input_language"] = self.config.input_language
-        if "{output_language}" in self.config.system_prompt:
-            substitutions["output_language"] = self.config.output_language
-        # Apply formatting safely
-        self.system_prompt = self.config.system_prompt.format(**substitutions)
+        self.system_prompt = self.system_prompt_template.render(
+            input_language=self.config.input_language,
+            output_language=self.config.output_language,
+        )
         self.messages.append({"role": "system", "content": self.system_prompt})
+
+    def _construct_message(self, ctx: TranslationContext) -> dict[str, str]:
+        message = self.message_template.render(
+            text=ctx.text,
+        )
+        return {"role": "user", "content": message}
 
     @property
     def is_ready(self) -> bool:
@@ -72,7 +88,7 @@ class LLMTranslator:
         )
         if self.stop_translation:
             return "Translation is paused at the moment"
-        self.messages.append({"role": "user", "content": ctx.text})
+        self.messages.append(self._construct_message(ctx))
         result = await self.execute()
         self.messages.append({"role": "assistant", "content": result})
         # Ensure only the last 10 user and assistant messages are kept
