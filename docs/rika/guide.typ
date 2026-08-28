@@ -26,6 +26,12 @@
 
 // Page layout
 
+#let guide-version = sys.inputs.at("version", default: "dev")
+#let build-date = sys.inputs.at(
+  "build-date",
+  default: datetime.today().display("[year]-[month]-[day]"),
+)
+
 #set document(
   title: [Hachimi Autotranslate Stories Guide],
 )
@@ -136,6 +142,49 @@
     y: 20mm,
   ),
   numbering: "1",
+
+  // Keep build information visible when a paragraph or figure is cropped.
+  // For release builds, pass metadata with:
+  //   typst compile --input version=1.0 --input build-date=2026-08-28 ...
+  foreground: context {
+    let mark = box(
+      text(
+        size: 6pt,
+        weight: "medium",
+        fill: rgb("#00000010"),
+        stroke: 0.2pt + rgb("#ffffff40"),
+      )[
+        TLServer Guide v#guide-version
+
+        #build-date · p#counter(page).display("1")
+      ],
+    )
+
+    let width = 55mm
+    let height = 25mm
+    let cols = (calc.floor(210mm / width) + 2)
+    let rows = (calc.floor(297mm / height) + 2)
+
+    let watermark-row(row) = move(
+      dx: if calc.rem(row, 2) == 0 { 0mm } else { -(width / 2) },
+      grid(
+        columns: (width,) * cols,
+        ..range(cols).map(_ => align(
+          center + horizon,
+          rotate(-15deg, pdf.artifact(mark)),
+        )),
+      ),
+    )
+
+    rotate(
+      -5deg,
+      grid(
+        columns: (210mm,),
+        rows: (height,) * rows,
+        ..range(rows).map(watermark-row),
+      ),
+    )
+  },
 
   footer: context {
     let current-page = here().page()
