@@ -1,0 +1,118 @@
+name: Windows release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install locked dependencies
+        run: uv sync --frozen --all-groups
+
+      - name: Verify tag matches package version
+        shell: pwsh
+        run: |
+          $version = uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"
+          $expectedTag = "v$version"
+          if ($env:GITHUB_REF_NAME -ne $expectedTag) {
+            throw "Release tag '$env:GITHUB_REF_NAME' does not match package version '$expectedTag'."
+          }
+
+      - name: Run tests
+        run: uv run pytest
+
+      - name: Install build-only environment
+        run: uv sync --frozen --no-dev --group build
+
+      - name: Build executable
+        run: uv run --no-dev --group build pyinstaller --clean --noconfirm tlserver.spec
+
+      - name: Smoke-test executable
+        shell: pwsh
+        run: |
+          $smokeDir = Join-Path $env:RUNNER_TEMP "tlserver-smoke"
+          New-Item -ItemType Directory -Path $smokeDir -Force | Out-Null
+          $configPath = Join-Path $smokeDir "config.toml"
+          @'
+          debug = false
+          root_port = 19000
+
+          [[translators]]
+          kind = "LLM"
+          port = 19001
+          '@ | Set-Content -Path $configPath -Encoding utf8
+
+          $env:TLSERVER_CONFIG_PATH = $configPath
+          $stdout = Join-Path $smokeDir "stdout.log"
+          $stderr = Join-Path $smokeDir "stderr.log"
+          $process = Start-Process -FilePath ".\dist\tlserver.exe" -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 60; $attempt++) {
+              if ($process.HasExited) {
+                throw "tlserver.exe exited with code $($process.ExitCode).`n$(Get-Content $stderr -Raw)"
+              }
+              try {
+                $body = @{ message = "check if server is ready" } | ConvertTo-Json
+                $response = Invoke-RestMethod -Uri "http://127.0.0.1:19001/" -Method Post -ContentType "application/json" -Body $body
+                if ($response -eq $true) {
+                  $ready = $true
+                  break
+                }
+              } catch {
+                Start-Sleep -Seconds 1
+              }
+            }
+            if (-not $ready) {
+              throw "tlserver.exe did not become ready.`n$(Get-Content $stderr -Raw)"
+            }
+          } finally {
+            if (-not $process.HasExited) {
+              Stop-Process -Id $process.Id -Force
+            }
+          }
+
+      - name: Create release bundle
+        id: bundle
+        shell: pwsh
+        run: |
+          $version = uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"
+          $bundleName = "tlserver-v$version-windows-x64"
+          $bundleDir = Join-Path $env:RUNNER_TEMP $bundleName
+          New-Item -ItemType Directory -Path $bundleDir -Force | Out-Null
+          Copy-Item "dist\tlserver.exe" $bundleDir
+          Copy-Item "config.sample.toml" $bundleDir
+          Copy-Item "packaging\README-Windows.txt" $bundleDir
+          $archive = Join-Path $PWD "$bundleName.zip"
+          Compress-Archive -Path "$bundleDir\*" -DestinationPath $archive -Force
+          "archive=$archive" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "bundle_name=$bundleName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" "${{ steps.bundle.outputs.archive }}#${{ steps.bundle.outputs.bundle_name }}.zip" --verify-tag --generate-notes --title "${{ github.ref_name }}"

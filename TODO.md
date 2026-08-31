@@ -1,5 +1,3 @@
-- github actions
-  - build pyinstaller exe
 - modern handler (death to separate ports per translator)
 - llm batching using structured outputs
   - might be outdated

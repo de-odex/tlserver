@@ -360,14 +360,11 @@ class AppSettings(BaseSettings):
 
 
 def get_executable_dir() -> Path | None:
-    executable_path = None
-    if not executable_path and getattr(sys, "frozen", False):
-        executable_path = Path(sys.executable).resolve().parent
-        logger.debug("frozen executable, executable at {}", executable_path)
-    # i think this one is scuffed
-    if not executable_path and hasattr(sys.modules.get("__main__"), "__file__"):
-        executable_path = Path(sys.modules["__main__"].__file__).resolve().parent  # pyright: ignore[reportArgumentType]
-        logger.debug("__main__, executable at {}", executable_path)
+    if not getattr(sys, "frozen", False):
+        return None
+
+    executable_path = Path(sys.executable).resolve().parent
+    logger.debug("frozen executable, executable at {}", executable_path)
     return executable_path
 
 
@@ -379,6 +376,8 @@ def find_config_path() -> Path | None:
         candidates.append(("xdg config home", Path(xdg) / "tlserver" / "config.toml"))
     if appdt := os.getenv("APPDATA"):
         candidates.append(("appdata", Path(appdt) / "tlserver" / "config.toml"))
+    if executable_dir := get_executable_dir():
+        candidates.append(("executable directory", executable_dir / "config.toml"))
     candidates.append(("cwd", Path.cwd() / "config.toml"))
 
     for label, p in candidates:
