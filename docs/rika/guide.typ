@@ -258,6 +258,8 @@
 #callout(type: "info")[
   Hi! This is my (Rika's) guide for setting up TLServer. It's mainly adapted from Spoot's guide.
 
+  This guide is under construction, but most info is roughly final.
+
   I will try to keep this updated, but if you accessed the file *directly* from a link, then you *won't* see updates.
 
   Make sure you accessed this through a *folder* link.
@@ -318,7 +320,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
 + Open up LM Studio and run through the setup if you haven’t already.
 
 + #block(breakable: false)[
-    Navigate to the bottom left of your window and click on the settings icon (or press `ctrl + ,`).
+    Navigate to the bottom left of your window and click on the *Settings* icon (or press `ctrl + ,`).
 
     #block(width: 100%)[
       #figure(
@@ -328,7 +330,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
   ]
 
 + #block(breakable: false)[
-    From here you’ll be greeted by this window here. Navigate to the runtime tab.
+    From here you’ll be greeted by this window here. Navigate to the *Runtime* tab.
 
     #block(width: 100%)[
       #figure(
@@ -348,7 +350,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
   ]
 
   - #block(breakable: false)[
-      For AMD GPUs, you should install the ROCm engine (Spoot used to recommend Vulkan but we dwell not in the days of yore). If ROCm causes issues or you're on an older AMD GPU, use Vulkan instead.
+      For AMD GPUs, you should install the *ROCm* engine (Spoot used to recommend Vulkan but we dwell not in the days of yore). If ROCm causes issues or you're on an older AMD GPU, use *Vulkan* instead.
 
       #block(width: 100%)[
         #figure(
@@ -364,7 +366,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
     ]
 
   - #block(breakable: false)[
-      For NVIDIA GPUs, you should pick CUDA.
+      For NVIDIA GPUs, you should pick *CUDA*.
       If you get slow LLM generation (< 10 tokens per second), try choosing the one that only says "CUDA" and not "CUDA 12".
 
       #block(width: 100%)[
@@ -397,44 +399,39 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
   ]
 
 + #block(breakable: false)[
-    Now you will need to download a suitable model according to how much VRAM your GPU has.
-
-    These are the models I (Rika) recommend:
-    - If you have 16 or more GB VRAM: *Hy MT2 7B*, GGUF format
-    - If you have 8 or more GB VRAM: *Hy MT2 1.8B*, GGUF format
-    - If you have 4 or less GB VRAM: *Good luck.* Try loading Hy MT2 1.8B and see if the `Q4_K_M` quantisation fits; we'll elaborate on that in the next step.
-
-    Spoot recommended these models; they're a couple of years old and may perform worse than the ones I recommend:
-
-    #text(fill: black.lighten(50%))[
-      *Best Model Hands Down (courtesy of Mario :3)*
-      - Umamusume Story Translator (this changed my life)
-
-      *Low VRAM (Less than 8gb)*
-      - Aya Expanse 8B
-      - Shisa Ai v2 Qwen2.5 7B (probably the best one at this range)
-      - Shisa Ai v2 Llama3.1 8B
-
-      *Med VRAM (12gb)*
-      - Sugoi 14B Ultra (most meta option rn)
-
-      *Higher VRAM (+16gb)* \
-      #callout(type: "info", style: "compact")[
-        Note that these models are barely any better than Sugoi.
-      ]
-      - Shisa Ai v2 Mistral Nemo 12B
-      - Shisa Ai v2 Unphi4 14B (my personal favourite to use)
-    ]
-  ]
-
-+ #block(breakable: false)[
-    Once you’ve decided on a model to use, pop over to the Model Search tab on LM Studio.
+    Open up the *Model Search* tab on LM Studio.
 
     #block(width: 100%)[
       #figure(
         image("./images/Screenshot_20260828_051217.png"),
       )
     ]
+  ]
+
++ #block(breakable: false)[
+    You'll need to choose a suitable model according to how much VRAM your GPU has.
+
+    A little bit of background first. The models I will talk about have two parts to them: the *base model*, and the *quantisation*.
+    Think of them as a *picture* and a *JPG version of that picture*.
+    Basically, there's an original (the base model) and a smaller version of the original (the quantisation).
+
+    First, base models recommended:
+    - `mradermacher/umamusume-translator-hy-mt2-7b-GGUF` if you have a lot of GPU VRAM.\
+      I will call this *Umamusume Translator*.
+    - #callout(type: "info")[
+        `mradermacher/umamusume-translator-hy-mt2-7b-i1-GGUF`, this is what I use in my bundled config. Note the *i1* in the name.\
+        I will call this *Umamusume Translator i1*.
+      ]
+    - `tencent/Hy-MT2-7B-GGUF`, if you prefer a general model for some reason.\
+      I will call this *Hy MT2 7B*.
+    - `tencent/Hy-MT2-1.8B-GGUF`, if you have a weak GPU.\
+      I will call this *Hy MT2 1.8B*.
+
+    These are the *minimum* models and quantisations I (Rika) recommend:
+    - If you have *16* or more GB VRAM: *Umamusume Translator* in the *Q4_K\_M* quantisation.
+    - If you have *8* or more GB VRAM: *Umamusume Translator i1* in the *IQ4_XS* quantisation.
+    - If you have *6* or more GB VRAM: *Umamusume Translator i1* in the *IQ3_XXS* quantisation. *This might be too tight; if it doesnt work, try the option below*.
+    - If you have *4* or less GB VRAM: *Good luck.* Try loading *Hy MT2 1.8B* and see if the *Q4_K\_M* quantisation fits; we'll elaborate on that in the next steps.
   ]
 
 + #block(breakable: false)[
@@ -477,7 +474,7 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
         )
       ]
 
-      If not, that's fine, but you will not have a fun time, as translations will be very slow. I'd recommend opening Spoot's guide and following the instructions for Sugoi Offline Translator instead.
+      If not, that's fine, but you will not have a fun time, as translations will be very slow. I'd recommend *opening Spoot's guide* and following the instructions for *Sugoi Offline Translator* instead.
     ]
 
 + #block(breakable: false)[
@@ -489,6 +486,42 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
       )
     ]
   ]
+
++ #block(breakable: false)[
+    Lastly, you will want to configure the model. Head over to *My Models*.
+    #block(width: 100%)[
+      #figure(
+        image("./images/Screenshot_20260831_043048.png"),
+      )
+    ]
+  ]
+
++ #block(breakable: false)[
+    Click on the model you downloaded, open *Load*, then set these settings:
+    - *Context Length*: *4096* is a good default. Maximum is *8192* if you have spare VRAM.
+
+    #block(width: 100%)[
+      #figure(
+        image("./images/Screenshot_20260831_043202.png"),
+      )
+    ]
+  ]
+
++ #block(breakable: false)[
+    Open *Inference*, then set these settings:
+    - *Temperature*: *0.7*
+    - *Top K*: *20*
+    - *Top P*: ticked *on*, *0.6*
+    - *Min P*: ticked *off*
+    - *Repetition Penalty*: ticked *on*, *1.05*
+
+    #block(width: 100%)[
+      #figure(
+        image("./images/Screenshot_20260831_045750.png", height: 45%),
+      )
+    ]
+  ]
+
 
 #pagebreak(weak: true)
 = TLServer Setup <tlsrv-setup>
@@ -527,106 +560,70 @@ By default, LM Studio should be able to detect your GPU, but just in case it doe
     ]
   ]
 
-== What the fuck is a config.toml file?
++ Okay, but what the fuck is a config.toml file?
 
-#block(breakable: false)[
-  Basically you’re telling TLServer where your LLM server is hosted at and how to use it.
-  As a general rule of thumb, at the bare minimum, your `config.toml` should be setup like below:
+  #block(breakable: false)[
+    Basically you’re telling TLServer where your LLM server is hosted at and how to use it.
+    As a general rule of thumb, at the bare minimum, your `config.toml` should be setup like below:
 
-  ```toml
-  debug = true
-  root_port = 8080
+    ```toml
+    debug = true
+    root_port = 8080
 
-  [[translators]]
-  kind = "LLM"
-  model_name = "lm_studio/{your model's name}"
-  # api_server = "http://127.0.0.1:1234/v1"
+    [[translators]]
+    kind = "LLM"
+    model_name = "lm_studio/{your model's name}"
+    # api_server = "http://127.0.0.1:1234/v1"
+    ```
+  ]
+
+  === Explanation of each variable
+  *api_server* - Basically just where your LM Studio instance is hosted. If you changed this setting in LM Studio, you have to uncomment and set it here too. Otherwise, don't change anything.
+
+  #block(breakable: false)[
+    *model_name* - Name of the model you're using in LM Studio. Should be in the format “lm_studio/{your model's name}”. You can find your model name in this screen:
+
+    #block(width: 100%)[
+      #figure(
+        image("./images/Screenshot_20260828_045043.png"),
+        caption: [In this example, the `model_name` should be `lm_studio/tencent/Hy-MT2-7B-GGUF`],
+      )
+    ]
+  ]
+
+  *system_prompt* - Instructions on what the LLM is meant to do, how it translates text, and specific dictionary references. You only need to set it if you're not using my config, or if you know what you're doing.
+
+  === Setting up the dictionary
+  #callout(type: "warning")[
+    This part is under construction.
+    The information here might be outdated.
+  ]
+  In your system prompt, you can specify a dictionary for the LLM to use on how to translate specific names or characters. This is highly important for LLMs with a lower parameter size.
+
+  You should run auto translation with a basic or no dictionary on a story once and reference the translations outputted in the command line to see what phrases or words might need a
+  dictionary.
+
+  Locations should be specified as a proper noun while names can just have the translation by itself. It is also a good idea to add every character’s name that appears in the story to the dictionary list as well.
+
+  For example, specifying how the LLM should translate a phrase or character’s name:
+  ```markdown
+  # Dictionary
+  Translate the below words accordingly
+  - "トレセン学園" as Tracen Academy and as a Proper Noun
+  - "ウマ娘" as "Uma Musume" and when referring to the game title as a common noun.
+  - "ダイワスカーレット" as "Daiwa Scarlet"
+  - "アストンマーチャン" as "Aston Machan" or if the shortened form is presented "アストンマ" translate it as "Machan", not marchan
   ```
-]
 
-=== Explanation of each variable
-*api_server* - Basically just where your LM Studio instance is hosted. If you changed this setting in LM Studio, you have to uncomment and set it here too. Otherwise, don't change anything.
+  The `system_prompt` I use for translating can be found in the shared folder. Feel free to adjust it accordingly.
 
-#block(breakable: false)[
-  *model_name* - Name of the model you're using in LM Studio. Should be in the format “lm_studio/{your model's name}”. You can find your model name in this screen:
-
-  #block(width: 100%)[
-    #figure(
-      image("./images/Screenshot_20260828_045043.png"),
-      caption: [In this example, the `model_name` should be `lm_studio/tencent/Hy-MT2-7B-GGUF`],
-    )
-  ]
-]
-
-*system_prompt* - Instructions on what the LLM is meant to do, how it translates text, and specific dictionary references. You only need to set it if you're not using my config, or if you know what you're doing.
-
-== LLM Model Config Suggestions
-
-#block(breakable: false)[
-  //If your suggested model config uses Top P, convert it into Min P:
-  //$ 1 – "Top P" = "Min P" $
-
-  For my recommended models:
-
-  *Hy MT2*:
-  All variants can use the same settings:
-  - *Temperature*: `0.7`
-  - *Top K*: `20`
-  - *Top P*: ticked on, `0.6`
-  - *Min P*: ticked off
-  - *Repetition Penalty*: ticked on, 1.05
-
-  I also recommend setting these:
-  - *Context Length*: As much as you can fit. I have a 16 GB GPU that can fit `32768` tokens, using up 2 GB extra VRAM. `8192` might be a good starting value, increase to `16384` if you can.
-
-  For Spoot's recommended models:
-
-  #text(fill: black.lighten(50%))[
-    *Shisa V2 Variants:*
-    Running sampler sweeps, we found the models operate well across a variety of temperatures in most settings. For translation tasks specifically, we recommend a lower temperature (0.2) to increase accuracy. To prevent cross-lingual token leakage we recommend a min_p of 0.1.
-    - *Temperature*: `0.2`
-    - *Min P*: `0.1`
-
-    *Sugoi 14B:*
-    - *Temperature*: `0.1`
-    - *Top K*: `40`
-    - *Min P*: `0.05`
-    - *Repetition Penalty*: `1.1`
-  ]
-]
-
-== Dictionary guide:
-#callout(type: "warning")[
-  TODO
-]
-In your system prompt, you can specify a dictionary for the LLM to use on how to translate specific names or characters. This is highly important for LLMs with a lower parameter size.
-
-You should run auto translation with a basic or no dictionary on a story once and reference the translations outputted in the command line to see what phrases or words might need a
-dictionary.
-
-Locations should be specified as a proper noun while names can just have the translation by itself. It is also a good idea to add every character’s name that appears in the story to the dictionary list as well.
-
-For example, specifying how the LLM should translate a phrase or character’s name:
-```markdown
-# Dictionary
-Translate the below words accordingly
-- "トレセン学園" as Tracen Academy and as a Proper Noun
-- "ウマ娘" as "Uma Musume" and when referring to the game title as a common noun.
-- "ダイワスカーレット" as "Daiwa Scarlet"
-- "アストンマーチャン" as "Aston Machan" or if the shortened form is presented "アストンマ" translate it as "Machan", not marchan
-```
-
-The `system_prompt` I use for translating can be found in the shared folder. Feel free to adjust it accordingly.
-
-4. #block(breakable: false)[
++ #block(breakable: false)[
     Once your `config.toml` file is set up, boot up Command Prompt and `cd` to your TLServer directory.
 
     Run the command `uv run tlserver`.
 
     #block(width: 100%)[
-      #figure(
-        image("./images/image3.png"),
-      )
+      #figure(image("./images/image3.png"))
     ]
   ]
 
@@ -689,22 +686,24 @@ The `system_prompt` I use for translating can be found in the shared folder. Fee
   ]
 
 + #block(breakable: false)[
-    The game should freeze for a moment. Check your Sugoi Server's command prompt and check if it has received any requests (it should look like the one below).
+    The game should freeze for a moment. Check your TLServer's command prompt and check if it has received any requests (it should look like the one below).
 
     #block(width: 100%)[
       #figure(
         image("./images/image50.png"),
+        caption: "Technically this is Sugoi Server, but it's similar enough",
       )
     ]
   ]
 
 + #block(breakable: false)[
-    Once your game unfreezes, the Sugoi server command prompt should look like this.
+    Once your game unfreezes, the TLServer command prompt should look like this.
     Your story should be translated now!
 
     #block(width: 100%)[
       #figure(
         image("./images/image43.png"),
+        caption: "Technically this is Sugoi Server, but it's similar enough",
       )
     ]
 
@@ -714,7 +713,7 @@ The `system_prompt` I use for translating can be found in the shared folder. Fee
       )
     ]
 
-    #callout(type: "info")[
+    #callout(type: "caution")[
       It is recommended that you only turn on auto translate stories for sections you actually care about, otherwise your game will turn into an unenjoyable laggy mess.
     ]
   ]
