@@ -245,7 +245,7 @@ class LLMTranslatorSettings(TranslatorSettingsBase):
     )
     port: int | None = 14368
     is_local: bool = True
-    model_name: str = "lm_studio/sugoi14b"
+    model_name: str = "sugoi14b"
     api_server: HttpUrl = HttpUrl("http://127.0.0.1:1234/v1")
     api_key: SecretStr = SecretStr("sk-fakefakefake")
     system_prompt: str = (
@@ -259,8 +259,13 @@ class LLMTranslatorSettings(TranslatorSettingsBase):
     )
     message_template: str = "{{ text }}"
     context_lines: int = 50
-    temperature: float = 0.4
-    top_p: float = 0.95
+    temperature: float | None = None
+    top_p: float | None = None
+    top_k: int | None = None
+    min_p: float | None = None
+    repeat_penalty: float | None = None
+    presence_penalty: float | None = None
+    frequency_penalty: float | None = None
 
 
 class DeepLTranslatorSettings(TranslatorSettingsBase):

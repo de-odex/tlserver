@@ -58,11 +58,17 @@ port = 14368
 input_language = "Japanese"
 output_language = "English"
 is_local = true
-model_name = "lm_studio/sugoi14b"
+model_name = "sugoi14b"
 api_server = "http://127.0.0.1:1234/v1"
 api_key = "sk-fakefakefake"
 
-# Adjust the tone/creativity of responses:
+# Optional sampling settings (unset values use the model/server defaults):
 # temperature = 0.4
+# top_p = 0.95
+# top_k = 40
+# min_p = 0.05
+# repeat_penalty = 1.1
+# presence_penalty = 0.0
+# frequency_penalty = 0.0
 # system_prompt = "You are a professional translator..."
 # context_lines = 50      # How much recent chat to send with each request

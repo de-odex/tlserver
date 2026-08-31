@@ -119,6 +119,26 @@ def test_handlers_ready(main_module: types.ModuleType) -> None:
     assert main_module.ports == {TRANSLATOR_PORT}
 
 
+def test_shutdown_closes_llm_clients(
+    main_module: types.ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    closed: list[str] = []
+
+    class FakeLLMTranslator:
+        async def close(self) -> None:
+            closed.append("closed")
+
+    main_module.handlers = [
+        types.SimpleNamespace(translator=FakeLLMTranslator()),
+        *main_module.handlers,
+    ]
+    monkeypatch.setattr(main_module, "LLMTranslator", FakeLLMTranslator)
+
+    asyncio.run(main_module.on_stop())
+
+    assert closed == ["closed"]
+
+
 def test_helpers_format_configuration_errors_and_rich_output(
     main_module: types.ModuleType,
 ) -> None:

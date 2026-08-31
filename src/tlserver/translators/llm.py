@@ -1,9 +1,6 @@
-from functools import partial
-
-import litellm
-import trio
 from jinja2 import Environment, StrictUndefined, select_autoescape
 from loguru import logger
+from openai import AsyncOpenAI
 
 from tlserver.config import LLMTranslatorSettings
 from tlserver.pipeline import TranslationPipeline
@@ -23,6 +20,11 @@ class LLMTranslator:
         self.messages = []
         self.translator = ""
         self.stop_translation = False
+
+        self.client = AsyncOpenAI(
+            api_key=config.api_key.get_secret_value(),
+            base_url=str(config.api_server) if config.is_local else None,
+        )
 
         self.pipeline = TranslationPipeline(config.preprocessors, config.postprocessors)
 
@@ -64,21 +66,42 @@ class LLMTranslator:
         self.translator_ready_or_not = True
         return self.translator_ready_or_not
 
+    async def close(self) -> None:
+        await self.client.close()
+
     async def execute(self) -> str:
-        kwargs = {
+        request: dict[str, object] = {
             "model": self.config.model_name,
             "messages": self.messages,
-            "api_key": self.config.api_key.get_secret_value(),
-            "temperature": self.config.temperature,
         }
-        if self.config.is_local:
-            kwargs["api_base"] = str(self.config.api_server)
 
-        response = await trio.to_thread.run_sync(partial(litellm.completion, **kwargs))
+        for name in (
+            "temperature",
+            "top_p",
+            "presence_penalty",
+            "frequency_penalty",
+        ):
+            value = getattr(self.config, name)
+            if value is not None:
+                request[name] = value
+
+        extra_body = {
+            name: value
+            for name in ("top_k", "min_p", "repeat_penalty")
+            if (value := getattr(self.config, name)) is not None
+        }
+        if extra_body:
+            request["extra_body"] = extra_body
+
+        response = await self.client.chat.completions.create(**request)  # pyright: ignore[reportArgumentType]
 
         logger.debug("messages: {}", self.messages)
 
-        return response.choices[0].message.content  # pyright: ignore[reportReturnType, reportAttributeAccessIssue]
+        content = response.choices[0].message.content
+        if content is None:
+            msg = "The language model returned no text"
+            raise ValueError(msg)
+        return content
 
     async def _translate(self, message: str) -> str:
         ctx = self.pipeline.preprocess(
