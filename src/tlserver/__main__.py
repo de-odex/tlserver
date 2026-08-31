@@ -173,3 +173,7 @@ async def amain() -> None:
 
 def main() -> None:
     trio.run(amain)
+
+
+if __name__ == "__main__":  # pragma: no cover - exercised by frozen smoke test
+    main()

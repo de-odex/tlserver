@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pytest
@@ -37,6 +38,44 @@ def test_find_config_path_returns_none_when_no_candidate_exists(
     monkeypatch.chdir(tmp_path)
 
     assert find_config_path() is None
+
+
+def test_find_config_path_uses_frozen_executable_directory_before_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    executable_dir = tmp_path / "application"
+    executable_dir.mkdir()
+    executable_config = executable_dir / "config.toml"
+    executable_config.write_text("root_port = 9999")
+    cwd = tmp_path / "working-directory"
+    cwd.mkdir()
+    (cwd / "config.toml").write_text("root_port = 8888")
+
+    monkeypatch.delenv("TLSERVER_CONFIG_PATH", raising=False)
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.delenv("APPDATA", raising=False)
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(executable_dir / "tlserver.exe"))
+    monkeypatch.chdir(cwd)
+
+    assert find_config_path() == executable_config
+
+
+def test_find_config_path_does_not_search_python_entrypoint_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cwd = tmp_path / "working-directory"
+    cwd.mkdir()
+    cwd_config = cwd / "config.toml"
+    cwd_config.write_text("root_port = 8888")
+
+    monkeypatch.delenv("TLSERVER_CONFIG_PATH", raising=False)
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.delenv("APPDATA", raising=False)
+    monkeypatch.delattr(sys, "frozen", raising=False)
+    monkeypatch.chdir(cwd)
+
+    assert find_config_path() == cwd_config
 
 
 def test_app_settings_loads_toml_and_environment_overrides_it(
