@@ -15,12 +15,39 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: windows-release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Build and publish Windows x64
     runs-on: windows-latest
 
     steps:
+      - name: Refuse duplicate release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          $tag = [uri]::EscapeDataString($env:RELEASE_TAG)
+          $response = Invoke-WebRequest `
+            -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" `
+            -Headers @{
+              Authorization = "Bearer $env:GH_TOKEN"
+              Accept = "application/vnd.github+json"
+              "X-GitHub-Api-Version" = "2022-11-28"
+            } `
+            -SkipHttpErrorCheck
+          if ($response.StatusCode -eq 200) {
+            throw "GitHub Release '$env:RELEASE_TAG' already exists. Refusing to publish it again."
+          }
+          if ($response.StatusCode -ne 404) {
+            throw "Unable to check for an existing release (HTTP $($response.StatusCode))."
+          }
+          Write-Host "No existing GitHub Release found for '$env:RELEASE_TAG'."
+
       - name: Check out repository
         uses: actions/checkout@v5
         with:
