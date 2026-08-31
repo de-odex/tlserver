@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build
+        required: true
+        default: v0.2.0
+        type: string
 
 permissions:
   contents: write
@@ -16,6 +23,15 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Use current tests for manual rebuild
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          git fetch origin $env:GITHUB_SHA
+          git restore --source=$env:GITHUB_SHA -- tests
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,11 +48,13 @@ jobs:
 
       - name: Verify tag matches package version
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
           $version = uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"
           $expectedTag = "v$version"
-          if ($env:GITHUB_REF_NAME -ne $expectedTag) {
-            throw "Release tag '$env:GITHUB_REF_NAME' does not match package version '$expectedTag'."
+          if ($env:RELEASE_TAG -ne $expectedTag) {
+            throw "Release tag '$env:RELEASE_TAG' does not match package version '$expectedTag'."
           }
 
       - name: Run tests
@@ -114,5 +132,6 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
-          gh release create "${{ github.ref_name }}" "${{ steps.bundle.outputs.archive }}#${{ steps.bundle.outputs.bundle_name }}.zip" --verify-tag --generate-notes --title "${{ github.ref_name }}"
+          gh release create "$env:RELEASE_TAG" "${{ steps.bundle.outputs.archive }}#${{ steps.bundle.outputs.bundle_name }}.zip" --verify-tag --generate-notes --title "$env:RELEASE_TAG"
