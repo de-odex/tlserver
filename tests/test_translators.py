@@ -180,27 +180,41 @@ def make_llm_config(**kwargs: object) -> LLMTranslatorSettings:
 
 def install_llm_completion_fake(
     monkeypatch: pytest.MonkeyPatch,
-) -> list[dict[str, object]]:
+) -> tuple[list[dict[str, object]], list[dict[str, object]], list[str]]:
+    clients: list[dict[str, object]] = []
     calls: list[dict[str, object]] = []
+    closes: list[str] = []
 
-    def completion(**kwargs: object) -> SimpleNamespace:
-        calls.append(kwargs)
-        message = kwargs["messages"][-1]["content"]  # pyright: ignore[reportIndexIssue]
-        return SimpleNamespace(
-            choices=[
-                SimpleNamespace(message=SimpleNamespace(content=f"result:{message}"))
-            ]
-        )
+    class FakeOpenAIClient:
+        def __init__(self) -> None:
+            self.chat = SimpleNamespace(completions=SimpleNamespace(create=self.create))
 
-    monkeypatch.setattr(llm_module.litellm, "completion", completion)
-    monkeypatch.setattr(llm_module.trio.to_thread, "run_sync", run_sync_immediately)
-    return calls
+        async def close(self) -> None:
+            closes.append("closed")
+
+        async def create(self, **completion_kwargs: object) -> SimpleNamespace:
+            calls.append(completion_kwargs)
+            message = completion_kwargs["messages"][-1]["content"]  # pyright: ignore[reportIndexIssue]
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(content=f"result:{message}")
+                    )
+                ]
+            )
+
+    def openai_client(**kwargs: object) -> FakeOpenAIClient:
+        clients.append(kwargs)
+        return FakeOpenAIClient()
+
+    monkeypatch.setattr(llm_module, "AsyncOpenAI", openai_client)
+    return clients, calls, closes
 
 
 def test_llm_translator_builds_local_request_and_runs_pipeline(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = install_llm_completion_fake(monkeypatch)
+    clients, calls, _closes = install_llm_completion_fake(monkeypatch)
     translator = LLMTranslator(
         make_llm_config(
             preprocessors=[
@@ -212,15 +226,29 @@ def test_llm_translator_builds_local_request_and_runs_pipeline(
                 )
             ],
             temperature=0.2,
+            top_p=0.9,
+            top_k=40,
+            min_p=0.05,
+            repeat_penalty=1.1,
+            presence_penalty=0.3,
+            frequency_penalty=0.4,
         )
     )
 
     assert translator.system_prompt == "Translate Japanese to English"
     assert translator.activate() is True
     assert asyncio.run(translator.translate("raw")) == "done:ready"
-    assert calls[0]["model"] == "lm_studio/sugoi14b"
-    assert calls[0]["api_base"] == "http://127.0.0.1:1234/v1"
+    assert clients[0]["base_url"] == "http://127.0.0.1:1234/v1"
+    assert calls[0]["model"] == "sugoi14b"
     assert calls[0]["temperature"] == 0.2
+    assert calls[0]["top_p"] == 0.9
+    assert calls[0]["presence_penalty"] == 0.3
+    assert calls[0]["frequency_penalty"] == 0.4
+    assert calls[0]["extra_body"] == {
+        "top_k": 40,
+        "min_p": 0.05,
+        "repeat_penalty": 1.1,
+    }
     assert [message["role"] for message in translator.messages] == [
         "system",
         "user",
@@ -228,20 +256,21 @@ def test_llm_translator_builds_local_request_and_runs_pipeline(
     ]
 
 
-def test_llm_translator_uses_no_api_base_for_remote_models(
+def test_llm_translator_uses_default_base_url_for_remote_models(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    calls = install_llm_completion_fake(monkeypatch)
+    clients, calls, _closes = install_llm_completion_fake(monkeypatch)
     translator = LLMTranslator(make_llm_config(is_local=False))
 
     assert asyncio.run(translator.translate("hello")) == "result:hello"
-    assert "api_base" not in calls[0]
+    assert clients[0]["base_url"] is None
+    assert set(calls[0]) == {"messages", "model"}
 
 
 def test_llm_batch_pause_context_and_language_changes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    install_llm_completion_fake(monkeypatch)
+    clients, _calls, closes = install_llm_completion_fake(monkeypatch)
     translator = LLMTranslator(make_llm_config(context_lines=3))
 
     assert asyncio.run(translator.translate_batch(["one", "two"])) == [
@@ -249,6 +278,7 @@ def test_llm_batch_pause_context_and_language_changes(
         "result:two",
     ]
     assert len(translator.messages) == 4
+    assert len(clients) == 1
     assert translator.messages[0]["role"] == "system"
     translator.pause()
     assert asyncio.run(translator.translate_batch(["one"])) == [
@@ -262,6 +292,8 @@ def test_llm_batch_pause_context_and_language_changes(
     assert translator.messages == [
         {"role": "system", "content": "Translate Japanese to German"}
     ]
+    asyncio.run(translator.close())
+    assert closes == ["closed"]
     assert (
         translator.change_input_language("Klingon")
         == "sorry, translator doesn't have this language"

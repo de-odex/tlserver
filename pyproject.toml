@@ -17,12 +17,9 @@ dependencies = [
   # "torch~=2.7",
   # "torchaudio~=2.7",
   # "torchvision~=0.12",
-  "litellm~=1.67",
+  "openai~=2.0",
   "ctranslate2~=4.2",
   "sentencepiece~=0.1",
-  # thanks litellm...
-  # "orjson",
-  # "fastapi",
   "pydantic>=2.11.7",
   "pydantic-settings>=2.11.0",
   "rich>=14.1.0",

@@ -109,6 +109,9 @@ async def on_start() -> None:
 
 @app.after_serving
 async def on_stop() -> None:
+    for handler in handlers:
+        if isinstance(handler.translator, LLMTranslator):
+            await handler.translator.close()
     logger.info("Goodbye, shutting down.")
 
 
