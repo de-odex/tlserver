@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 from types import SimpleNamespace
 from typing import ClassVar
 
@@ -59,7 +60,24 @@ class FakeCTranslateTranslator:
 
 
 @pytest.fixture
-def offline_translator(monkeypatch: pytest.MonkeyPatch) -> OfflineTranslator:
+def offline_model_paths(tmp_path: Path) -> dict[str, Path]:
+    translate_model_path = tmp_path / "translate"
+    translate_model_path.mkdir()
+    tok_source_model_path = tmp_path / "source.model"
+    tok_target_model_path = tmp_path / "target.model"
+    tok_source_model_path.touch()
+    tok_target_model_path.touch()
+    return {
+        "translate_model_path": translate_model_path,
+        "tok_source_model_path": tok_source_model_path,
+        "tok_target_model_path": tok_target_model_path,
+    }
+
+
+@pytest.fixture
+def offline_translator(
+    monkeypatch: pytest.MonkeyPatch, offline_model_paths: dict[str, Path]
+) -> OfflineTranslator:
     FakeCTranslateTranslator.instances = []
     FakeSentencePieceProcessor.instances = []
     monkeypatch.setattr(
@@ -73,6 +91,7 @@ def offline_translator(monkeypatch: pytest.MonkeyPatch) -> OfflineTranslator:
         offline_module.OfflineTranslatorSettings(
             kind="Offline",
             port=19001,
+            **offline_model_paths,
             preprocessors=[
                 ReplaceProcessorSettings(kind="replace", replacements={"raw": "ready"})
             ],
@@ -147,9 +166,13 @@ def test_offline_translator_translates_batches_and_honors_pause(
     assert offline_translator.stop_translation is False
 
 
-def test_offline_language_changes_reflect_capability() -> None:
+def test_offline_language_changes_reflect_capability(
+    offline_model_paths: dict[str, Path],
+) -> None:
     translator = OfflineTranslator(
-        offline_module.OfflineTranslatorSettings(kind="Offline", port=19001)
+        offline_module.OfflineTranslatorSettings(
+            kind="Offline", port=19001, **offline_model_paths
+        )
     )
 
     assert translator.check_if_language_available("Japanese") is True
