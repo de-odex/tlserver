@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import importlib
+import json
 import logging
 import signal
 import sys
@@ -23,6 +24,13 @@ TRANSLATOR_PORT = 19001
 
 
 def _write_minimal_config(tmp_path: Path) -> Path:
+    translate_model_path = tmp_path / "models" / "translate"
+    translate_model_path.mkdir(parents=True)
+    tok_source_model_path = tmp_path / "models" / "spm.ja.model"
+    tok_target_model_path = tmp_path / "models" / "spm.en.model"
+    tok_source_model_path.touch()
+    tok_target_model_path.touch()
+
     config_path = tmp_path / "config.toml"
     config_path.write_text(
         textwrap.dedent(
@@ -34,6 +42,9 @@ def _write_minimal_config(tmp_path: Path) -> Path:
             kind = "Offline"
             enabled = true
             port = {TRANSLATOR_PORT}
+            translate_model_path = {json.dumps(str(translate_model_path))}
+            tok_source_model_path = {json.dumps(str(tok_source_model_path))}
+            tok_target_model_path = {json.dumps(str(tok_target_model_path))}
             """
         ).strip()
     )
