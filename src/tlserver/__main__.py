@@ -4,7 +4,7 @@ import signal
 import sys
 from collections.abc import Sequence
 from io import StringIO
-from typing import Literal, overload
+from typing import Any, Literal, overload
 
 import trio
 from hypercorn.config import Config
@@ -15,8 +15,13 @@ from quart_cors import cors
 from quart_trio import QuartTrio
 from rich.console import Console
 from rich.pretty import Pretty
+from rich.text import Text
 
-from tlserver.config import AppSettings, Version
+from tlserver.config import (
+    AppSettings,
+    LoggingConsoleOutputSettings,
+    Version,
+)
 from tlserver.handler import (
     LegacyTranslatorHandler,
     TranslatorHandler,
@@ -58,6 +63,21 @@ class InterceptHandler(logging.Handler):
         )
 
 
+FILE_LOG_FORMAT = (
+    "{time:YYYY-MM-DD HH:mm:ss.SSS} | "
+    "{level: <8} | "
+    "{name}:{function}:{line} - "
+    "{extra[plain_message]}"
+)
+
+
+def file_log_format(record: dict[str, Any]) -> str:
+    record["extra"]["plain_message"] = Text.from_ansi(record["message"]).plain
+    return FILE_LOG_FORMAT
+
+
+logger.remove()
+bootstrap_sink_id = logger.add(sys.stderr, level="WARNING")
 logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
 
@@ -85,9 +105,46 @@ try:
 except ValidationError as exc:
     logger.error(format_validation_error(exc))
     sys.exit(1)
-if not config.debug:
-    logger.remove()
-    logger.add(sys.stderr, level="INFO")
+
+
+sink_ids: list[int] = []
+
+try:
+    if config.logging is None:
+        sink_ids.append(
+            logger.add(
+                sys.stderr,
+                level="DEBUG" if config.debug else "INFO",
+            )
+        )
+    else:
+        for output in config.logging.outputs:
+            if isinstance(output, LoggingConsoleOutputSettings):
+                sink_ids.append(
+                    logger.add(
+                        sys.stderr if output.stream == "stderr" else sys.stdout,
+                        level=config.logging.level,
+                    )
+                )
+            else:
+                sink_ids.append(
+                    logger.add(
+                        output.path,
+                        level=config.logging.level,
+                        rotation=output.rotation,
+                        retention=output.retention,
+                        colorize=False,
+                        format=file_log_format,
+                    )
+                )
+except (OSError, TypeError, ValueError) as exc:
+    for sink_id in sink_ids:
+        logger.remove(sink_id)
+    logger.error("Invalid logging configuration: {}", exc)
+    sys.exit(1)
+
+logger.remove(bootstrap_sink_id)
+
 logger.info(f"Config loaded:\n{rich_str(config.model_dump())}")
 
 app = QuartTrio(__name__)

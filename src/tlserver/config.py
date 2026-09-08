@@ -29,6 +29,7 @@ from pydantic import (
     HttpUrl,
     SecretStr,
     ValidationInfo,
+    field_validator,
     model_validator,
 )
 from pydantic_core import core_schema
@@ -304,8 +305,41 @@ TranslatorSettings = Annotated[
 ]
 
 
+class LoggingConsoleOutputSettings(_BaseModel):
+    kind: Literal["console"]
+    stream: Literal["stdout", "stderr"] = "stdout"
+
+
+class LoggingFileOutputSettings(_BaseModel):
+    kind: Literal["file"]
+    path: str
+    rotation: str
+    retention: str | int
+
+
+LoggingOutputSettings = Annotated[
+    LoggingConsoleOutputSettings | LoggingFileOutputSettings,
+    Field(discriminator="kind"),
+]
+
+
+class LoggingSettings(_BaseModel):
+    level: Literal["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
+    outputs: Annotated[list[LoggingOutputSettings], Field(min_length=1)]
+
+    @field_validator("outputs")
+    @classmethod
+    def at_most_one_console(
+        cls, v: list[LoggingOutputSettings]
+    ) -> list[LoggingOutputSettings]:
+        if sum(isinstance(los, LoggingConsoleOutputSettings) for los in v) > 1:
+            raise ValueError("too many console outputs")
+        return v
+
+
 class AppSettings(BaseSettings):
     debug: bool = False
+    logging: LoggingSettings | None = None
 
     # no effect on legacy handlers
     root_port: int

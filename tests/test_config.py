@@ -9,6 +9,8 @@ from pydantic import ValidationError
 from tlserver.config import (
     AppSettings,
     LLMTranslatorSettings,
+    LoggingFileOutputSettings,
+    LoggingSettings,
     OfflineTranslatorSettings,
     Version,
     find_config_path,
@@ -110,6 +112,29 @@ def test_disabled_offline_translator_skips_missing_model_path_validation() -> No
     )
 
     assert settings.translators[0].enabled is False
+
+
+def test_logging_settings_require_at_least_one_output() -> None:
+    with pytest.raises(ValidationError, match="List should have at least 1 item"):
+        LoggingSettings(level="INFO", outputs=[])
+
+
+def test_file_logging_accepts_an_integer_retention_count() -> None:
+    settings = LoggingSettings(
+        level="INFO",
+        outputs=[
+            {
+                "kind": "file",
+                "path": "tlserver.log",
+                "rotation": "1 MB",
+                "retention": 5,
+            }
+        ],
+    )
+
+    output = settings.outputs[0]
+    assert isinstance(output, LoggingFileOutputSettings)
+    assert output.retention == 5
 
 
 @pytest.mark.parametrize(

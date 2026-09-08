@@ -11,6 +11,7 @@ import types
 from typing import TYPE_CHECKING, Any
 
 import pytest
+from loguru import logger
 from pydantic import ValidationError
 
 from tlserver.config import AppSettings, LLMTranslatorSettings
@@ -21,6 +22,18 @@ if TYPE_CHECKING:
 
 ROOT_PORT = 19000
 TRANSLATOR_PORT = 19001
+
+MAIN_MODULE_NAMES = [
+    "tlserver.__main__",
+    "tlserver.handler",
+    "tlserver.translators.offline",
+    "tlserver.config",
+]
+
+
+def _forget_main_modules() -> None:
+    for module_name in MAIN_MODULE_NAMES:
+        sys.modules.pop(module_name, None)
 
 
 def _write_minimal_config(tmp_path: Path) -> Path:
@@ -98,20 +111,12 @@ def main_module(
     config_env: Path,  # noqa: ARG001
     stub_dependencies: None,  # noqa: ARG001
 ) -> Generator[types.ModuleType, Any, None]:
-    module_names = [
-        "tlserver.__main__",
-        "tlserver.handler",
-        "tlserver.translators.offline",
-        "tlserver.config",
-    ]
-    for module_name in module_names:
-        sys.modules.pop(module_name, None)
+    _forget_main_modules()
 
     module = importlib.import_module("tlserver.__main__")
     yield module
 
-    for module_name in module_names:
-        sys.modules.pop(module_name, None)
+    _forget_main_modules()
 
 
 def test_appsettings_reads_minimal_config(config_env: Path) -> None:  # noqa: ARG001
@@ -161,6 +166,31 @@ def test_helpers_format_configuration_errors_and_rich_output(
     assert text.startswith("Config validation failed:")
     assert "translators" in text
     assert "hello" in main_module.rich_str({"message": "hello"})
+
+
+def test_console_keeps_ansi_while_file_output_strips_it(
+    main_module: types.ModuleType,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    log_path = tmp_path / "output.log"
+
+    console_sink = logger.add(sys.stdout, colorize=True)
+    file_sink = logger.add(
+        log_path,
+        colorize=False,
+        format=main_module.file_log_format,
+    )
+
+    try:
+        logger.info(main_module.rich_str({"message": "hello"}))
+    finally:
+        logger.remove(console_sink)
+        logger.remove(file_sink)
+
+    assert "\x1b[" in capsys.readouterr().out
+    assert "\x1b[" not in log_path.read_text()
+    assert "hello" in log_path.read_text()
 
 
 def test_intercept_handler_forwards_standard_log_records(
@@ -248,3 +278,88 @@ def test_main_starts_trio_runner(
     main_module.main()
 
     assert called == [main_module.amain]
+
+
+def test_file_only_logging_does_not_leak_config_discovery_to_stderr(
+    config_env: Path,
+    stub_dependencies: None,  # noqa: ARG001
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    log_path = tmp_path / "tlserver.log"
+    config_env.write_text(
+        config_env.read_text()
+        + textwrap.dedent(
+            f"""
+
+            [logging]
+            level = "ERROR"
+
+            [[logging.outputs]]
+            kind = "file"
+            path = {json.dumps(str(log_path))}
+            rotation = "1 MB"
+            retention = 5
+            """
+        )
+    )
+    monkeypatch.setenv("TLSERVER_CONFIG_PATH", str(config_env))
+    _forget_main_modules()
+
+    try:
+        importlib.import_module("tlserver.__main__")
+        captured = capsys.readouterr()
+    finally:
+        logger.remove()
+        _forget_main_modules()
+
+    assert captured.out == ""
+    assert captured.err == ""
+
+
+def test_invalid_later_sink_does_not_leave_earlier_sink_installed(
+    config_env: Path,
+    stub_dependencies: None,  # noqa: ARG001
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    log_path = tmp_path / "tlserver.log"
+    config_env.write_text(
+        config_env.read_text()
+        + textwrap.dedent(
+            f"""
+
+            [logging]
+            level = "INFO"
+
+            [[logging.outputs]]
+            kind = "console"
+            stream = "stdout"
+
+            [[logging.outputs]]
+            kind = "file"
+            path = {json.dumps(str(log_path))}
+            rotation = "not a valid rotation"
+            retention = 5
+            """
+        )
+    )
+    monkeypatch.setenv("TLSERVER_CONFIG_PATH", str(config_env))
+    _forget_main_modules()
+
+    try:
+        with pytest.raises(SystemExit) as caught:
+            importlib.import_module("tlserver.__main__")
+
+        startup_output = capsys.readouterr()
+        logger.info("sink leak probe")
+        leaked_output = capsys.readouterr()
+    finally:
+        logger.remove()
+        _forget_main_modules()
+
+    assert caught.value.code == 1
+    assert "Invalid logging configuration" in startup_output.err
+    assert "sink leak probe" not in leaked_output.out
