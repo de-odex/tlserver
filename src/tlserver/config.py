@@ -313,8 +313,8 @@ class LoggingConsoleOutputSettings(_BaseModel):
 class LoggingFileOutputSettings(_BaseModel):
     kind: Literal["file"]
     path: str
-    rotation: str
-    retention: str | int
+    rotation: str | None = None
+    retention: str | int | None = None
 
 
 LoggingOutputSettings = Annotated[
