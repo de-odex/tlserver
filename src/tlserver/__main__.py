@@ -67,7 +67,8 @@ FILE_LOG_FORMAT = (
     "{time:YYYY-MM-DD HH:mm:ss.SSS} | "
     "{level: <8} | "
     "{name}:{function}:{line} - "
-    "{extra[plain_message]}"
+    "{extra[plain_message]}\n"
+    "{exception}"
 )
 
 
